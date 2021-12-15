@@ -10,6 +10,7 @@ TODO
 ## Making a Set
 ### Board Specification
 TODO
+(note: p0 is any non-player piece)
 ### Win Condition Specification
 TODO
 ### Lose Condition Specification
@@ -18,6 +19,15 @@ TODO
 TODO
 ### Script Specification
 TODO
+
+### Set Validation
+Order of validation:
+ * pieces csv
+ * pieces scripts
+ * board
+ * win
+ * lose
+
 
 ## Repo Structure
 ```
