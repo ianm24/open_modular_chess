@@ -1,7 +1,7 @@
 # Code by Ian McDowell 2021
 import ast, csv, re
 from os import listdir
-from os.path import isfile, join
+from os.path import isdir, isfile, join
 
 SETS_DIR = "../sets/"
 """ File path to 'sets' directory """
@@ -19,6 +19,36 @@ NUM_BOARD_VALS = 3
 SCRIPT_ERROR_CODE = 1
 """Number to indicate which script the error is from """
 
+def load_set(set_name):
+    """
+    Loads a set
+
+    Inputs:
+        set_name - String
+            The selected set's folder name inside the 'sets' directory
+    Outputs:
+        loaded_set - list [???]
+            Contains all parts of the loaded set
+        errorcodes - Tuple (int script_error_code, int method_error_code, int check_error_code, Tuple prev_errors)
+            The error codes is there were any
+    """
+    #Sets the error code for the current method
+    METHOD_ERROR_CODE = 1
+
+    filepath = SETS_DIR + set_name
+
+    if not isdir(filepath):
+        print(f"Error: The set {set_name} is not in the sets directory.")
+        return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,1)]
+
+    #pieces = get_pieces(set_name)
+    #board = get_board(set_name)
+    #win = get_win(set_name)
+    #lose = get_lose(set_name)
+
+    #return [pieces,board,win,lose]
+
+
 def get_piece_names(set_name): #TODO add tests for each error code
     """
     Gets the name of all pieces in a set
@@ -33,16 +63,23 @@ def get_piece_names(set_name): #TODO add tests for each error code
             The error codes is there were any
     """
     #Sets the error code for the current method
-    METHOD_ERROR_CODE = 1
+    METHOD_ERROR_CODE = 2
 
     #Gets filepath for pieces
     filepath = SETS_DIR + set_name + SET_PIECES_DIR
+
+    if not isdir(filepath):
+        print(f"Error: The set {set_name} does not contain a 'pieces' directory.")
+        return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,1)]
 
     pieces = [file.replace(".csv","") for file in listdir(filepath) if isfile(join(filepath,file))]
     
     if pieces == []:
         print(f"Error: The pieces directory for set {set_name} appears to be empty.")
-        return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,1)]
+        return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,2)]
+
+    #Sort in alphabetical order
+    pieces.sort()
 
     return [pieces,None]
 
@@ -60,11 +97,15 @@ def get_board(set_name): #TODO add tests for each error code
             The error codes is there were any 
     """
     #Sets the error code for the current method
-    METHOD_ERROR_CODE = 2
+    METHOD_ERROR_CODE = 3
     
     #Initializes empty board and establishes filepath to set's board file
     board = []
     filepath = SETS_DIR + set_name + BOARD_FILE_NAME
+
+    if not isdir(filepath):
+        print(f"Error: The set {set_name} does not contain a '{BOARD_FILE_NAME}' file.")
+        return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,1)]
 
     #Tries to load the set's board file
     try:
@@ -74,7 +115,7 @@ def get_board(set_name): #TODO add tests for each error code
                 board = row
     except IOError:
         print(f"Error: The file {filepath} for set {set_name} couldn't be loaded.")
-        return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,1)]
+        return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,2)]
 
     #Tries to get integer dimension
     try:
@@ -83,7 +124,7 @@ def get_board(set_name): #TODO add tests for each error code
         print(f"Error: Invalid board dimension type in set {set_name}. ",
             f"The dimensions should be of type {int}. This set's "
             f"row dimension is of type {type(board[0])}.")
-        return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,2)]
+        return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,3)]
     
     #Tries to get integer dimension
     try:
@@ -92,7 +133,7 @@ def get_board(set_name): #TODO add tests for each error code
         print(f"Error: Invalid board dimension type in set {set_name}. ",
             f"The dimensions should be of type {int}. This set's "
             f"column dimension is of type {type(board[1])}.")
-        return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,3)]
+        return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,4)]
     
     #Converts from string to list
     board[2] = ast.literal_eval(board[2])
@@ -104,7 +145,7 @@ def get_board(set_name): #TODO add tests for each error code
         return board
     else:
         print(f"Error: Board from set {set_name} failed to validate.")
-        return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,4,errorcodes)]
+        return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,5,errorcodes)]
 
 
 def validate_board(board,set_name): #TODO add tests for each error code
@@ -123,7 +164,7 @@ def validate_board(board,set_name): #TODO add tests for each error code
             The error codes is there were any
     """
     #Sets the error code for the current method
-    METHOD_ERROR_CODE = 3
+    METHOD_ERROR_CODE = 4
 
     #Set filepath from set name
     filepath = SETS_DIR + set_name + BOARD_FILE_NAME
