@@ -1,7 +1,7 @@
 # Code by Ian McDowell 2021
 import ast, csv, re
 from os import listdir
-from os.path import isdir, isfile, join
+from os.path import isdir, isfile, join, exists
 
 SETS_DIR = "../sets/"
 """ File path to 'sets' directory """
@@ -49,7 +49,7 @@ def load_set(set_name):
     #return [pieces,board,win,lose]
 
 
-def get_piece_names(set_name): #TODO add tests for each error code
+def get_piece_names(set_name):
     """
     Gets the name of all pieces in a set
 
@@ -102,8 +102,9 @@ def get_board(set_name): #TODO add tests for each error code
     #Initializes empty board and establishes filepath to set's board file
     board = []
     filepath = SETS_DIR + set_name + BOARD_FILE_NAME
-
-    if not isdir(filepath):
+    
+    print(filepath)
+    if not exists(filepath):
         print(f"Error: The set {set_name} does not contain a '{BOARD_FILE_NAME}' file.")
         return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,1)]
 
@@ -113,9 +114,14 @@ def get_board(set_name): #TODO add tests for each error code
             reader = csv.reader(csvfile,delimiter="|")
             for row in reader: #Only 1 row
                 board = row
-    except IOError:
-        print(f"Error: The file {filepath} for set {set_name} couldn't be loaded.")
+    except UnicodeDecodeError:
+        print(f"Error: The file {filepath} for set {set_name} is not a properly formatted csv file.")
         return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,2)]
+    
+    if len(board) == 0:
+        print(f"Error: The file {filepath} for set {set_name} appears to be empty.")
+        return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,3)]
+
 
     #Tries to get integer dimension
     try:
@@ -124,7 +130,7 @@ def get_board(set_name): #TODO add tests for each error code
         print(f"Error: Invalid board dimension type in set {set_name}. ",
             f"The dimensions should be of type {int}. This set's "
             f"row dimension is of type {type(board[0])}.")
-        return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,3)]
+        return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,4)]
     
     #Tries to get integer dimension
     try:
@@ -133,7 +139,7 @@ def get_board(set_name): #TODO add tests for each error code
         print(f"Error: Invalid board dimension type in set {set_name}. ",
             f"The dimensions should be of type {int}. This set's "
             f"column dimension is of type {type(board[1])}.")
-        return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,4)]
+        return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,5)]
     
     #Converts from string to list
     board[2] = ast.literal_eval(board[2])
@@ -145,7 +151,7 @@ def get_board(set_name): #TODO add tests for each error code
         return board
     else:
         print(f"Error: Board from set {set_name} failed to validate.")
-        return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,5,errorcodes)]
+        return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,6,errorcodes)]
 
 
 def validate_board(board,set_name): #TODO add tests for each error code
@@ -231,7 +237,7 @@ def validate_board(board,set_name): #TODO add tests for each error code
                     return [False,(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,7)]
 
                 #Check for valid piece suffix
-                piece_names = get_piece_names(set_name)
+                piece_names = get_piece_names(set_name)[0]
                 has_piece_suffix = False
                 for name in piece_names:
                     piece = re.search(name,curr_cell)
