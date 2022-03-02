@@ -227,7 +227,7 @@ def validate_board(board,set_name): #TODO add tests for each error code
             #Check it is a valid piece
             if curr_cell != "":
                 #Check for player prefix
-                player_prefix = re.search("p[0-9]+",curr_cell)
+                player_prefix = re.search("p[0-9]+_",curr_cell)
                 if not player_prefix:
                     print(f"\nError: Invalid player prefix for piece on board in set {set_name}. ",
                         f"The non-blank entry in row {i+1} and column {j+1} of the layout is ",
@@ -241,7 +241,7 @@ def validate_board(board,set_name): #TODO add tests for each error code
                 for name in piece_names:
                     piece = re.search(name,curr_cell)
                     if piece:
-                        if len(curr_cell.replace(player_prefix[0]+"_","")) != len(name): #Check the name isn't a substring of the actual piece
+                        if len(curr_cell.replace(player_prefix[0],"")) != len(name): #Check the name isn't a substring of the actual piece
                             continue
                         else:
                             has_piece_suffix = True
