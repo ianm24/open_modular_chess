@@ -8,16 +8,22 @@ The base set in `/sets/base_set` is an example of the file structure and specifi
 In a command window, go to the `src` directory and run `python3 open_modular_chess_core/main.py`
 
 ## Making a Set
-### Board Specification
-TODO
-(note: p0 is any non-player piece)
-### Win Condition Specification
-TODO
-### Lose Condition Specification
-TODO
 ### Piece Specification
 TODO
 ### Script Specification
+TODO
+### Board Specification
+Board files should be comprised of 3 values in the following order, separated by `|`:
+* Number of Rows - Positive integer
+* Number of Columns - Positive integer
+* Board Layout
+    * The board layout consists of a list of comma-separated rows with a length corresponding to the Number of Rows and encapsulated by brackets, [].
+    * Each row should be a list of comma-separated strings, specifically strings using double quotes ", with a length corresponding to the Number of Columns and encapsulated by brackets, [].
+        * Each string indicates a piece, with a set of empty quotes, `""`, indicating no piece is in that position.
+        * A piece string should be of the form `p[0-9]+_piecename` with a prefix indicating the player a piece belongs to (with p0 indicating a non-player piece) and a suffix indicating which piece is in that position on the board (`[0-9]+` indicates one or more digits can be between the `p` and the `_`).
+### Win Condition Specification
+TODO
+### Lose Condition Specification
 TODO
 
 ### Set Validation
