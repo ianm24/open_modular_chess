@@ -38,7 +38,7 @@ def load_set(set_name):
     filepath = SETS_DIR + set_name
 
     if not isdir(filepath):
-        print(f"Error: The set {set_name} is not in the sets directory.")
+        print(f"\nError: The set {set_name} is not in the sets directory.")
         return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,1)]
 
     #pieces = get_pieces(set_name)
@@ -69,13 +69,13 @@ def get_piece_names(set_name):
     filepath = SETS_DIR + set_name + SET_PIECES_DIR
 
     if not isdir(filepath):
-        print(f"Error: The set {set_name} does not contain a 'pieces' directory.")
+        print(f"\nError: The set {set_name} does not contain a 'pieces' directory.")
         return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,1)]
 
     pieces = [file.replace(".csv","") for file in listdir(filepath) if isfile(join(filepath,file))]
     
     if pieces == []:
-        print(f"Error: The pieces directory for set {set_name} appears to be empty.")
+        print(f"\nError: The pieces directory for set {set_name} appears to be empty.")
         return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,2)]
 
     #Sort in alphabetical order
@@ -103,9 +103,8 @@ def get_board(set_name): #TODO add tests for each error code
     board = []
     filepath = SETS_DIR + set_name + BOARD_FILE_NAME
     
-    print(filepath)
     if not exists(filepath):
-        print(f"Error: The set {set_name} does not contain a '{BOARD_FILE_NAME}' file.")
+        print(f"\nError: The set {set_name} does not contain a '{BOARD_FILE_NAME}' file.")
         return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,1)]
 
     #Tries to load the set's board file
@@ -115,11 +114,11 @@ def get_board(set_name): #TODO add tests for each error code
             for row in reader: #Only 1 row
                 board = row
     except UnicodeDecodeError:
-        print(f"Error: The file {filepath} for set {set_name} is not a properly formatted csv file.")
+        print(f"\nError: The file {filepath} for set {set_name} is not a properly formatted csv file.")
         return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,2)]
     
     if len(board) == 0:
-        print(f"Error: The file {filepath} for set {set_name} appears to be empty.")
+        print(f"\nError: The file {filepath} for set {set_name} appears to be empty.")
         return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,3)]
 
 
@@ -127,7 +126,7 @@ def get_board(set_name): #TODO add tests for each error code
     try:
         board[0] = int(board[0])
     except ValueError:
-        print(f"Error: Invalid board dimension type in set {set_name}. ",
+        print(f"\nError: Invalid board dimension type in set {set_name}. ",
             f"The dimensions should be of type {int}. This set's "
             f"row dimension is of type {type(board[0])}.")
         return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,4)]
@@ -136,22 +135,27 @@ def get_board(set_name): #TODO add tests for each error code
     try:
         board[1] = int(board[1])
     except ValueError:
-        print(f"Error: Invalid board dimension type in set {set_name}. ",
+        print(f"\nError: Invalid board dimension type in set {set_name}. ",
             f"The dimensions should be of type {int}. This set's "
             f"column dimension is of type {type(board[1])}.")
         return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,5)]
     
     #Converts from string to list
-    board[2] = ast.literal_eval(board[2])
+    try:
+        board[2] = ast.literal_eval(board[2])
+    except ValueError:
+        print(f"\nError: Board layout in set {set_name} contains an invalid value type",
+            f"Ensure that all strings have quotes around them.")
+        return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,6)]
 
     #Tries to validate board and returns it if successful
     [valid,errorcodes] = validate_board(board,set_name)
     if valid:
-        print(f"Successfully loaded board from set {set_name}")
+        print(f"\nSuccessfully loaded board from set {set_name}")
         return board
     else:
-        print(f"Error: Board from set {set_name} failed to validate.")
-        return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,6,errorcodes)]
+        print(f"\nError: Board from set {set_name} failed to validate.")
+        return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,7,errorcodes)]
 
 
 def validate_board(board,set_name): #TODO add tests for each error code
@@ -174,17 +178,12 @@ def validate_board(board,set_name): #TODO add tests for each error code
 
     #Set filepath from set name
     filepath = SETS_DIR + set_name + BOARD_FILE_NAME
-
-    #Non-empty file check
-    if board == ['']:
-        print(f"Error: The file {filepath} in set {set_name} appears to be empty.")
-        return [False,(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,1)]
     
     #Correct amount of board values check
     if len(board) != NUM_BOARD_VALS:
-        print(f"Error: Invalid board format in set {set_name}. ",
+        print(f"\nError: Invalid board format in set {set_name}. ",
              f"There are {len(board)} arguments when there should be {NUM_BOARD_VALS}")
-        return [False,(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,2)]
+        return [False,(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,1)]
 
     #Get values from board
     num_rows = board[0]
@@ -193,48 +192,48 @@ def validate_board(board,set_name): #TODO add tests for each error code
 
     #Valid board dimensions check
     if board[0] < 1 or board[1] < 1:
-        print(f"Error: Invalid board dimensions in set {set_name}. ",
+        print(f"\nError: Invalid board dimensions in set {set_name}. ",
             f"The dimensions (# of rows, # of cols) must be positive. This set's ",
             f"dimensions are ({num_rows},{num_cols}).")
-        return [False,(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,3)]
+        return [False,(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,2)]
 
 
     #Board layout matches dimensions check
     #Check rows
     if len(board_layout) != num_rows:
-        print(f"Error: Invalid board layout in set {set_name}. ",
+        print(f"\nError: Invalid board layout in set {set_name}. ",
             f"The number of rows in the layout is {len(board_layout)} and does not ",
             f"match the board dimension specified {num_rows}.")
-        return [False,(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,4)]
+        return [False,(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,3)]
 
     for i in range(len(board_layout)):
         curr_row = board_layout[i]
         #Check columns
         if len(curr_row) != num_cols:
-            print(f"Error: Invalid board layout in set {set_name}. ",
-                f"The number of columns in row {i+1} of the layout is {len(board_layout)} ",
+            print(f"\nError: Invalid board layout in set {set_name}. ",
+                f"The number of columns in row {i+1} of the layout is {len(curr_row)} ",
                 f"and does not match the board dimension specified {num_cols}.")
-            return [False,(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,5)]
+            return [False,(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,4)]
 
         for j in range(len(curr_row)):
             curr_cell = curr_row[j]
             #Check type
             if not isinstance(curr_cell,str):
-                print(f"Error: Invalid type for piece on board in set {set_name}. ",
+                print(f"\nError: Invalid type for piece on board in set {set_name}. ",
                     f"The entry in row {i+1} and column {j+1} of the layout is ",
                     f"{curr_cell} and of type {type(curr_cell)} but should be a string.")
-                return [False,(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,6)]
+                return [False,(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,5)]
             
             #Check it is a valid piece
             if curr_cell != "":
                 #Check for player prefix
                 player_prefix = re.search("p[0-9]+",curr_cell)
                 if not player_prefix:
-                    print(f"Error: Invalid player prefix for piece on board in set {set_name}. ",
+                    print(f"\nError: Invalid player prefix for piece on board in set {set_name}. ",
                         f"The non-blank entry in row {i+1} and column {j+1} of the layout is ",
                         f"{curr_cell} and does not have a player prefix. ",
                         f"Non-player pieces should have the prefix \'p0\'")
-                    return [False,(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,7)]
+                    return [False,(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,6)]
 
                 #Check for valid piece suffix
                 piece_names = get_piece_names(set_name)[0]
@@ -248,9 +247,9 @@ def validate_board(board,set_name): #TODO add tests for each error code
                             has_piece_suffix = True
                 
                 if not has_piece_suffix:
-                    print(f"Error: Invalid name for piece on board in set {set_name}. ",
+                    print(f"\nError: Invalid name for piece on board in set {set_name}. ",
                         f"The non-blank entry in row {i+1} and column {j+1} of the layout is ",
                         f"{curr_cell} and does not have a piece name specified for the set. ",
                         f"The piece should be one of {piece_names}")
-                    return [False,(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,8)]
+                    return [False,(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,7)]
     return [True,None]

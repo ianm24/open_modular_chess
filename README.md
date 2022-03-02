@@ -31,7 +31,7 @@ Order of validation:
 ## Testing
 Tests are located in the `src/tests` directory. Test files follow the naming scheme `test_{name_of_file_tested}`. Test classes follow the naming scheme `Test{NameOfMethodBeingTested}` and each test follows the naming scheme `test_{description_of_test}`. 
 
-Some tests require specific set conditions, these sets can be found in `sets/test_sets` and follow the naming scheme `test_set_{description_of_test}` where the description_of_test is the same as the testing method that uses the set.
+Some tests require specific set conditions, these sets can be found in `sets/test_sets` and follow the naming scheme `test_set_{description_of_test}[_testsetnum]` where the `description_of_test` is the same as the testing method that uses the set and `testsetnum` is an optional number used if a test requires multiple test sets.
 
 To run all the tests, in a command window go to the `src` directory and run `python3 -m unittest -v`.
 
