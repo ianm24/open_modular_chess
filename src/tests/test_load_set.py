@@ -26,7 +26,7 @@ class TestGetPieceNames(unittest.TestCase):
         #Ensures proper function when a set does not contain a pieces directory
         self.assertEqual(load_set.get_piece_names("test_sets/test_set_missing_pieces_directory"),[[],(SEC,gpnMEC,1)])
 
-    def test_empty_pieces_directory(self):
+    def test_empty_pieces_directory(self): #TODO make this test work while keeping the directory in repository
         #Ensures proper function when a set has an empty pieces directory
 
         #Remove the ensure commit file to create empty directory
