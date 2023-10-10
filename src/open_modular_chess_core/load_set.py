@@ -30,7 +30,7 @@ def load_set(set_name):
         loaded_set - list [???]
             Contains all parts of the loaded set
         errorcodes - Tuple (int script_error_code, int method_error_code, int check_error_code, Tuple prev_errors)
-            The error codes is there were any
+            The error codes if there were any
     """
     #Sets the error code for the current method
     METHOD_ERROR_CODE = 1
@@ -46,7 +46,7 @@ def load_set(set_name):
     #win = get_win(set_name)
     #lose = get_lose(set_name)
 
-    #return [pieces,board,win,lose]
+    #return [[pieces,board,win,lose], None]
 
 
 def get_piece_names(set_name):
@@ -60,7 +60,7 @@ def get_piece_names(set_name):
         piece_names - list [string,*]
             Contains the names of every piece in the set
         errorcodes - Tuple (int script_error_code, int method_error_code, int check_error_code, Tuple prev_errors)
-            The error codes is there were any
+            The error codes if there were any
     """
     #Sets the error code for the current method
     METHOD_ERROR_CODE = 2
@@ -83,7 +83,7 @@ def get_piece_names(set_name):
 
     return [pieces,None]
 
-def get_board(set_name): #TODO add tests for each error code
+def get_board(set_name):
     """
     Gets the board information for a set
 
@@ -94,7 +94,7 @@ def get_board(set_name): #TODO add tests for each error code
         board - List [int num_rows, int num_cols, num_rows x num_cols String List]
             Contains dimensions and piece placement of board
         errorcodes - Tuple (int script_error_code, int method_error_code, int check_error_code, Tuple prev_errors)
-            The error codes is there were any 
+            The error codes if there were any 
     """
     #Sets the error code for the current method
     METHOD_ERROR_CODE = 3
@@ -103,6 +103,8 @@ def get_board(set_name): #TODO add tests for each error code
     board = []
     filepath = SETS_DIR + set_name + BOARD_FILE_NAME
     
+    print(filepath)
+
     if not exists(filepath):
         print(f"\nError: The set {set_name} does not contain a '{BOARD_FILE_NAME}' file.")
         return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,1)]
@@ -158,7 +160,7 @@ def get_board(set_name): #TODO add tests for each error code
         return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,7,errorcodes)]
 
 
-def validate_board(board,set_name): #TODO add tests for each error code
+def validate_board(board,set_name):
     """
     Validates that a loaded board fits specifications
 
@@ -171,7 +173,7 @@ def validate_board(board,set_name): #TODO add tests for each error code
         isValid - boolean
             Whether or not the board fits specifications
         errorcodes - Tuple (int script_error_code, int method_error_code, int check_error_code, Tuple prev_errors)
-            The error codes is there were any
+            The error codes if there were any
     """
     #Sets the error code for the current method
     METHOD_ERROR_CODE = 4

@@ -1,14 +1,20 @@
 from distutils.log import error
+from os import remove
+from os.path import exists
 import unittest
+
 import open_modular_chess_core
 from open_modular_chess_core import load_set
 
-#Error codes for the script and each method
+#Load script and method error codes
 SEC = load_set.SCRIPT_ERROR_CODE
-lsMEC = 1
-gpnMEC = 2
-gbMEC = 3
-vbMEC = 4
+lsMEC = 1 #LoadSet
+gpnMEC = 2 #GetPieceNames
+gbMEC = 3 #GetBoard
+vbMEC = 4 #ValidateBoard
+
+#Load ensure commit file title
+EC = "ensure_commit.txt"
 
 class TestLoadSet(unittest.TestCase):
     def test_incorrect_set_name(self):
@@ -22,7 +28,23 @@ class TestGetPieceNames(unittest.TestCase):
 
     def test_empty_pieces_directory(self):
         #Ensures proper function when a set has an empty pieces directory
-        self.assertEqual(load_set.get_piece_names("test_sets/test_set_empty_pieces_directory"),[[],(SEC,gpnMEC,2)])
+
+        #Remove the ensure commit file to create empty directory
+        set_dir = "test_sets/test_set_empty_pieces_directory/"
+        
+        if exists("../sets/"+set_dir+"pieces/"+EC):
+            remove("../sets/"+set_dir+"pieces/"+EC)
+            self.assertEqual(1,1)
+        
+        #Get result for the test
+        result = load_set.get_piece_names(set_dir)
+
+        #Recreate the ensure commit file
+        file = open("../sets/"+set_dir+"pieces/"+EC,"x")
+        file.close()
+
+        #Run the test
+        self.assertEqual(result,[[],(SEC,gpnMEC,2)])
 
     def test_get_piece_names(self):
         #Ensures the correct piece names are gotten for a set
@@ -73,8 +95,6 @@ class TestGetBoard(unittest.TestCase):
                 ['p1_rook', 'p1_knight', 'p1_bishop', 'p1_king', 'p1_queen', 'p1_bishop', 'p1_knight', 'p1_rook']]]
         self.assertEqual(load_set.get_board("base_set"),base_set_board)
 
-
-#TODO Add tests for each error code for validating boards
 class TestValidateBoard(unittest.TestCase):
     def test_extra_values_board(self):
         #Ensures proper function when a set has a board with extra values
