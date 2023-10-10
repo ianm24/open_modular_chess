@@ -34,7 +34,6 @@ class TestGetPieceNames(unittest.TestCase):
         
         if exists("../sets/"+set_dir+"pieces/"+EC):
             remove("../sets/"+set_dir+"pieces/"+EC)
-            self.assertEqual(1,1)
         
         #Get result for the test
         result = load_set.get_piece_names(set_dir)
