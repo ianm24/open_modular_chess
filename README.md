@@ -5,7 +5,7 @@ This idea is still in its infancy, but its structure is well defined (and becomi
 The base set in `/sets/base_set` is an example of the file structure and specifications that are used to define the base rules of chess.
 
 ## How to Use
-In a command window, go to the `src` directory and run `python3 open_modular_chess_core/main.py`
+In a command window, go to the `src` directory and run `python3 core/main.py`
 
 ## Making a Set
 ### Piece Specification
@@ -47,7 +47,7 @@ open-modular-chess
 │   README.md (This Document)
 │   LICENSE (Standard MIT License)
 └───src
-|   └───open_modular_chess_core
+|   └───core
 |   |       __init__.py (Package Managing)
 |   |       load_set.py (Used for loading sets into play)
 |   |       main.py (The main program)
