@@ -1,3 +1,5 @@
+# Code by Chandler McDowell 2023
+
 from distutils.log import error
 from os import remove
 from os.path import exists
@@ -92,7 +94,9 @@ class TestGetBoard(unittest.TestCase):
                 ['', '', '', '', '', '', '', ''],
                 ['p1_pawn', 'p1_pawn', 'p1_pawn', 'p1_pawn','p1_pawn', 'p1_pawn', 'p1_pawn', 'p1_pawn'],
                 ['p1_rook', 'p1_knight', 'p1_bishop', 'p1_king', 'p1_queen', 'p1_bishop', 'p1_knight', 'p1_rook']]]
-        self.assertEqual(load_set.get_board("base_set"),base_set_board)
+        
+        result,errors = load_set.get_board("base_set")
+        self.assertEqual(result,base_set_board)
 
 class TestValidateBoard(unittest.TestCase):
     def test_extra_values_board(self):

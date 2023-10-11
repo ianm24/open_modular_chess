@@ -9,7 +9,7 @@ In a command window, go to the `src` directory and run `python3 open_modular_che
 
 ## Making a Set
 ### Piece Specification
-TODO
+1 character to represent piece in console, hex of 64-bit number representing 8x8 pixel image to represent the piece in a GUI
 ### Script Specification
 TODO
 ### Board Specification

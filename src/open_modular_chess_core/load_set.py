@@ -1,4 +1,4 @@
-# Code by Ian McDowell 2021
+# Code by Chandler McDowell 2023
 import ast, csv, re
 from os import listdir
 from os.path import isdir, isfile, join, exists
@@ -19,7 +19,7 @@ NUM_BOARD_VALS = 3
 SCRIPT_ERROR_CODE = 1
 """Number to indicate which script the error is from """
 
-def load_set(set_name):
+def load_set(set_name: str) -> [list,tuple]:
     """
     Loads a set
 
@@ -49,7 +49,7 @@ def load_set(set_name):
     #return [[pieces,board,win,lose], None]
 
 
-def get_piece_names(set_name):
+def get_piece_names(set_name: str) -> [list,tuple]:
     """
     Gets the name of all pieces in a set
 
@@ -83,7 +83,7 @@ def get_piece_names(set_name):
 
     return [pieces,None]
 
-def get_board(set_name):
+def get_board(set_name: str) -> [list,tuple]:
     """
     Gets the board information for a set
 
@@ -154,13 +154,13 @@ def get_board(set_name):
     [valid,errorcodes] = validate_board(board,set_name)
     if valid:
         print(f"\nSuccessfully loaded board from set {set_name}")
-        return board
+        return [board,None]
     else:
         print(f"\nError: Board from set {set_name} failed to validate.")
         return [[],(SCRIPT_ERROR_CODE,METHOD_ERROR_CODE,7,errorcodes)]
 
 
-def validate_board(board,set_name):
+def validate_board(board: list,set_name: str) -> [bool,tuple]:
     """
     Validates that a loaded board fits specifications
 
