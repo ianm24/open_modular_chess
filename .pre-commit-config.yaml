@@ -1,0 +1,40 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+    -   id: check-docstring-first
+    -   id: check-merge-conflict
+    -   id: end-of-file-fixer
+    -   id: mixed-line-ending
+    -   id: name-tests-test
+        args: [--pytest-test-first]
+    -   id: requirements-txt-fixer
+    -   id: trailing-whitespace
+-   repo: https://github.com/asottile/reorder-python-imports
+    rev: v3.9.0
+    hooks:
+    -   id: reorder-python-imports
+-   repo: https://github.com/asottile/pyupgrade
+    rev: v3.4.0
+    hooks:
+    -   id: pyupgrade
+-   repo: https://github.com/hhatto/autopep8
+    rev: v2.0.4
+    hooks:
+    -   id: autopep8
+-   repo: https://github.com/PyCQA/flake8
+    rev: 6.0.0
+    hooks:
+    -   id: flake8
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.3.0
+    hooks:
+    -   id: mypy
+-   repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+    -   id: python-no-eval
+    -   id: python-no-log-warn
+    -   id: rst-backticks
+    -   id: rst-directive-colons
+    -   id: rst-inline-touching-normal
