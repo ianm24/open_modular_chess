@@ -14,7 +14,7 @@ class Piece:
         Constructor for a piece.
 
         Parameters:
-            :param piece_char: 1 character string that represent the piece in
+            :param piece_char: 1-character string that represent the piece in
                 the command line display
             :param piece_pxl_hex: Hex value of 64-bit number representing an
                 8x8 pixel grid to display the piece in a GUI.
@@ -50,6 +50,26 @@ class Piece:
             current_coords = (0, 0)
 
         self.current_coords = current_coords
+
+    @property
+    def piece_char(self) -> str:
+        '''
+        Gets the character representation for the piece.
+
+        :return piece_char: 1-character string that represent the piece in
+            the command line display
+        '''
+        return self._piece_char
+
+    @property
+    def piece_pxl_hex(self) -> int:
+        '''
+        Gets the pixel-hex representation for the piece.
+
+        :return piece_pxl_hex: Hex value of 64-bit number representing an
+            8x8 pixel grid to display the piece in a GUI.
+        '''
+        return self._piece_pxl_hex
 
     def list_moves(self) -> list[tuple(int, int),]:
         '''
