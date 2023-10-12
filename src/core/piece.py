@@ -8,7 +8,7 @@ class Piece:
 
     def __init__(
             self, piece_char: str, piece_pxl_hex: int,
-            current_coords: Optional(tuple[int, int]) = None
+            current_coords: Optional[tuple[int, int]] = None
     ):
         """
         Constructor for a piece.
@@ -71,7 +71,7 @@ class Piece:
         '''
         return self._piece_pxl_hex
 
-    def list_moves(self) -> list[tuple(int, int),]:
+    def list_moves(self) -> list[Optional[tuple[int, int]],]:
         '''
         Gives a list of all available moves for the piece.
 
@@ -81,7 +81,7 @@ class Piece:
 
         return [None]
 
-    def move(self, coords: tuple(int, int)) -> bool:
+    def move(self, coords: tuple[int, int]) -> bool:
         '''
         Performs an action on the piece using arguments
 
@@ -121,7 +121,8 @@ class Piece:
             try:
                 x_coord = int(args[0])
                 y_coord = int(args[1])
-                return self.move((x_coord, y_coord))
             except ValueError:
                 print(f"Invalid arguments for action {action}")
                 return False
+
+        return self.move((x_coord, y_coord))
