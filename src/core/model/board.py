@@ -13,5 +13,6 @@ class Board:
 
     def __eq__(self, other):
         if isinstance(other, Board):
-            return self.rows == other.rows and self.columns == other.columns and self.layout == other.layout
+            return (self.rows == other.rows and self.columns == other.columns
+                    and self.layout == other.layout)
         return False
