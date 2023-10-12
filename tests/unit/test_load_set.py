@@ -43,15 +43,15 @@ def test_empty_pieces_directory():
     # Remove the ensure commit file to create empty directory
     set_dir = "test_sets/test_set_empty_pieces_directory/"
 
-    if exists("../resources/sets/" + set_dir + "pieces/" + EC):
-        remove("../resources/sets/" + set_dir + "pieces/" + EC)
+    if exists("./resources/sets/" + set_dir + "pieces/" + EC):
+        remove("./resources/sets/" + set_dir + "pieces/" + EC)
 
     # Run the test
     with pytest.raises(PiecesEmptyException):
         load_set.get_piece_names(set_dir, test_flag=True)
 
     # Recreate the ensure commit file
-    file = open("../resources/sets/" + set_dir + "pieces/" + EC, "x")
+    file = open("./resources/sets/" + set_dir + "pieces/" + EC, "x")
     file.close()
 
 
