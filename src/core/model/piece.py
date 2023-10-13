@@ -2,13 +2,12 @@
 from typing import Optional
 
 from core.exception.exception import MissingPieceCharException
-from core.exception.exception import PiecePxlHexOutOfBoundsException
+from core.exception.exception import NegativePieceCoordinatesException
 from core.exception.exception import NegativePiecePlayerNumException
+from core.exception.exception import PiecePxlHexOutOfBoundsException
+from core.model.board import Board
 # TODO uncomment this once board updated with current_players
 # from core.exception.exception import NonCurrentPiecePlayerNumException
-from core.exception.exception import NegativePieceCoordinatesException
-
-from core.model.board import Board
 
 
 class Piece:
