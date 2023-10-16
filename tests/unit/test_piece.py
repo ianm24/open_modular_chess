@@ -1,13 +1,14 @@
 from typing import Optional
 
 import pytest
-from core.exception.exception import MissingPieceCharException
-from core.exception.exception import NegativePieceCoordinatesException
-from core.exception.exception import NegativePiecePlayerNumException
-from core.exception.exception import NonCurrentPiecePlayerNumException
-from core.exception.exception import PiecePixelHexOutOfBoundsException
-from core.model.board import Board
-from core.model.piece import Piece
+
+from src.core.exception.exception import MissingPieceCharException
+from src.core.exception.exception import NegativePieceCoordinatesException
+from src.core.exception.exception import NegativePiecePlayerNumException
+from src.core.exception.exception import NonCurrentPiecePlayerNumException
+from src.core.exception.exception import PiecePixelHexOutOfBoundsException
+from src.core.model.board import Board
+from src.core.model.piece import Piece
 
 '''___init___ tests'''
 
