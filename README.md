@@ -1,4 +1,6 @@
 # Open Modular Chess
+[![test](https://github.com/ianm24/open_modular_chess/actions/workflows/workflow.yaml/badge.svg)](https://github.com/ianm24/open_modular_chess/actions/workflows/workflow.yaml)
+
 The idea behind this project is making a version of chess where anyone can test out their own ideas for new pieces, board sizes, as well as win and lose conditions.
 This idea is still in its infancy, but its structure is well defined (and becoming more well-defined as it is developed).
 
