@@ -14,17 +14,26 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: 3.11
 
     - name: Install dependencies
       run: pip install -r requirements.txt
 
-    - name: Run unit tests
+    - name: Run unit tests with coverage
       env:
         PYTHONPATH: ${{ github.workspace }}/src
-      run: pytest tests/unit
+      run: |
+        pip install coverage
+        coverage run -m pytest tests/unit --log-cli-level INFO
+
+    - name: Assert coverage percentage
+      run: |
+        coverage report --fail-under=80
+        COVERAGE=$?
+        echo "Coverage exit code: $COVERAGE"
+        exit $COVERAGE
