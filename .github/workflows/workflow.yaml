@@ -31,5 +31,9 @@ jobs:
         pip install coverage
         coverage run -m pytest tests/unit --log-cli-level INFO
 
-    - name: Upload Coverage to Codecov
-      uses: codecov/codecov-action@v3
+    - name: Assert coverage percentage
+      run: |
+        coverage report --fail-under=80
+        COVERAGE=$?
+        echo "Coverage exit code: $COVERAGE"
+        exit $COVERAGE
