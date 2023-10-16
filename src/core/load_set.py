@@ -10,16 +10,16 @@ from os.path import isdir
 from os.path import isfile
 from os.path import join
 
-from core.exception.exception import BoardNotFoundException
-from core.exception.exception import BoardValidationFailedException
-from core.exception.exception import EmptyBoardException
-from core.exception.exception import InvalidBoardDimensionException
-from core.exception.exception import InvalidBoardFormatException
-from core.exception.exception import InvalidBoardLayoutException
-from core.exception.exception import PiecesEmptyException
-from core.exception.exception import PiecesNotFoundException
-from core.exception.exception import SetNotFoundException
-from core.model.board import Board
+from src.core.exception.exception import BoardNotFoundException
+from src.core.exception.exception import BoardValidationFailedException
+from src.core.exception.exception import EmptyBoardException
+from src.core.exception.exception import InvalidBoardDimensionException
+from src.core.exception.exception import InvalidBoardFormatException
+from src.core.exception.exception import InvalidBoardLayoutException
+from src.core.exception.exception import PiecesEmptyException
+from src.core.exception.exception import PiecesNotFoundException
+from src.core.exception.exception import SetNotFoundException
+from src.core.model.board import Board
 
 ''' File path to 'sets' directory '''
 SETS_DIR = dirname(abspath(__file__)) + '/../../resources/sets/'

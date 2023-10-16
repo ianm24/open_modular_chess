@@ -1,13 +1,13 @@
 # Code by Chandler McDowell 2023
 from typing import Optional
 
-from core.exception.exception import MissingPieceCharException
-from core.exception.exception import NegativePieceCoordinatesException
-from core.exception.exception import NegativePiecePlayerNumException
-from core.exception.exception import PiecePixelHexOutOfBoundsException
-from core.model.board import Board
+from src.core.exception.exception import MissingPieceCharException
+from src.core.exception.exception import NegativePieceCoordinatesException
+from src.core.exception.exception import NegativePiecePlayerNumException
+from src.core.exception.exception import PiecePixelHexOutOfBoundsException
+from src.core.model.board import Board
 # TODO uncomment this once board updated with current_players
-# from core.exception.exception import NonCurrentPiecePlayerNumException
+# from src.core.exception.exception import NonCurrentPiecePlayerNumException
 
 
 class Piece:
