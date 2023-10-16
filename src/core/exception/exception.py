@@ -42,7 +42,7 @@ class MissingPieceCharException(AbstractOpenModularChessException):
     """Piece character missing for piece"""
 
 
-class PiecePxlHexOutOfBoundsException(AbstractOpenModularChessException):
+class PiecePixelHexOutOfBoundsException(AbstractOpenModularChessException):
     """Piece pixel-hex value out of bounds for piece"""
 
 

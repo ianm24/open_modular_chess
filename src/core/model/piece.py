@@ -4,7 +4,7 @@ from typing import Optional
 from core.exception.exception import MissingPieceCharException
 from core.exception.exception import NegativePieceCoordinatesException
 from core.exception.exception import NegativePiecePlayerNumException
-from core.exception.exception import PiecePxlHexOutOfBoundsException
+from core.exception.exception import PiecePixelHexOutOfBoundsException
 from core.model.board import Board
 # TODO uncomment this once board updated with current_players
 # from core.exception.exception import NonCurrentPiecePlayerNumException
@@ -54,7 +54,7 @@ class Piece:
 
         # Ensure piece pixel-hex is valid
         if piece_pxl_hex < 1 or piece_pxl_hex > (2**64)-1:
-            raise PiecePxlHexOutOfBoundsException(
+            raise PiecePixelHexOutOfBoundsException(
                 "Error: Piece pixel-hex for"
                 f" {self.__class__.__name__} is out of bounds. Pixel-hex"
                 f" is {piece_pxl_hex} which is not between 1 and 2^64 - 1.")
@@ -149,7 +149,7 @@ class Piece:
             the piece.
         '''
 
-        return [(0, 1)]
+        raise NotImplementedError
 
     def move(self, coords: tuple[int, int]) -> bool:
         '''
