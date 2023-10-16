@@ -36,3 +36,23 @@ class InvalidBoardDimensionException(AbstractOpenModularChessException):
 
 class BoardValidationFailedException(AbstractOpenModularChessException):
     """Specified set not found in the sets directory"""
+
+
+class MissingPieceCharException(AbstractOpenModularChessException):
+    """Piece character missing for piece"""
+
+
+class PiecePixelHexOutOfBoundsException(AbstractOpenModularChessException):
+    """Piece pixel-hex value out of bounds for piece"""
+
+
+class NegativePiecePlayerNumException(AbstractOpenModularChessException):
+    """Player controller set to negative value"""
+
+
+class NegativePieceCoordinatesException(AbstractOpenModularChessException):
+    """Piece coordinates set to negative value"""
+
+
+class NonCurrentPiecePlayerNumException(AbstractOpenModularChessException):
+    """Piece player controller set to a non-current player"""
