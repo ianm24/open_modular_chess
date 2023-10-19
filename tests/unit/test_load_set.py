@@ -58,15 +58,15 @@ def test_empty_pieces_directory():
 
 def test_get_piece_names():
     """Ensures the correct piece names are gotten for a set"""
-    expected_base_set_names = [
+    expected_base_set_names = {
         'bishop',
         'king',
         'knight',
         'pawn',
         'queen',
         'rook'
-    ]
-    actual_base_set_names = list(load_set.get_piece_map("base_set").keys())
+    }
+    actual_base_set_names = set(load_set.get_piece_map("base_set").keys())
     assert actual_base_set_names == expected_base_set_names
 
 
