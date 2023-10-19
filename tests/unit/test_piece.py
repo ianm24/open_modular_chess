@@ -2,7 +2,6 @@ from typing import Optional
 
 import numpy as np
 import pytest
-from numpy import ndarray
 
 from omc.core.exception.exception import NegativePieceCoordinatesException
 from omc.core.exception.exception import NegativePiecePlayerNumException
@@ -21,24 +20,6 @@ class SimplePiece(Piece):
 
     DEFAULT_PIECE_CHAR: str = 't'
     DEFAULT_PIECE_PIXEL_HEX: int = 0xFF18181818181818
-
-    def __init__(
-            self, board_: Board,
-            piece_char: str | None = None,
-            piece_pxl_hex: int | None = None,
-            current_coords: ndarray[int] | None = None,
-            player_controller: int | None = None
-    ):
-        """
-        Calls parent constructor for test class
-        """
-        super().__init__(
-            board_,
-            piece_char,
-            piece_pxl_hex,
-            current_coords,
-            player_controller
-        )
 
     def list_moves(self) -> list[Optional[tuple[int, int]],]:
         """
@@ -383,13 +364,17 @@ def test_set_noncurrent_player_control():
     expected_player_controller = 1
 
     test_board = Board.empty(np.array([8, 8]))
-    test_board.add_player(Player(expected_player_controller))
-    p = SimplePiece(test_board)
+    player = Player(expected_player_controller)
+    test_board.add_player(player)
+    piece = SimplePiece(test_board)
+    player.add_piece(piece)
 
-    assert p.set_player_control(2) is False
-    assert p.player_controller == expected_player_controller
+    assert piece.set_player_control(2) is False
+    assert piece.player_controller == expected_player_controller
+    assert piece in player.pieces
 
 
+@pytest.mark.xfail(reason="Player pieces not updated on set player controller")
 def test_set_player_control():
     """
     Ensures proper function of set_player_control with valid input
@@ -397,12 +382,17 @@ def test_set_player_control():
     expected_player_controller = 2
 
     test_board = Board.empty(np.array([8, 8]))
-    test_board.add_player(Player(1))
-    test_board.add_player(Player(expected_player_controller))
-    p = SimplePiece(test_board)
+    player1 = Player(1)
+    player2 = Player(expected_player_controller)
+    test_board.add_player(player1)
+    test_board.add_player(player2)
+    piece = SimplePiece(test_board)
+    player1.add_piece(piece)
 
-    assert p.set_player_control(expected_player_controller) is True
-    assert p.player_controller == expected_player_controller
+    assert piece.set_player_control(expected_player_controller) is True
+    assert piece.player_controller == expected_player_controller
+    assert piece not in test_board.get_player(1).pieces
+    assert piece in player2.pieces
 
 
 '''Capture Tests'''

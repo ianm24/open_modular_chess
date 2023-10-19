@@ -64,3 +64,7 @@ class PieceSubclassInvalidException(AbstractOpenModularChessException):
 
 class PieceAlreadyAtLocationException(AbstractOpenModularChessException):
     """Piece attempted to place on top of other piece without replacement"""
+
+
+class PlayerNotControllingPieceException(AbstractOpenModularChessException):
+    """Player attempted to add a piece it does not control"""
