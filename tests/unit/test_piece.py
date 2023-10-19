@@ -2,13 +2,13 @@ from typing import Optional
 
 import pytest
 
-from src.core.exception.exception import MissingPieceCharException
-from src.core.exception.exception import NegativePieceCoordinatesException
-from src.core.exception.exception import NegativePiecePlayerNumException
-from src.core.exception.exception import NonCurrentPiecePlayerNumException
-from src.core.exception.exception import PiecePixelHexOutOfBoundsException
-from src.core.model.board import Board
-from src.core.model.piece import Piece
+from omc.core.exception.exception import MissingPieceCharException
+from omc.core.exception.exception import NegativePieceCoordinatesException
+from omc.core.exception.exception import NegativePiecePlayerNumException
+from omc.core.exception.exception import NonCurrentPiecePlayerNumException
+from omc.core.exception.exception import PiecePixelHexOutOfBoundsException
+from omc.core.model.board import Board
+from omc.core.model.board import Piece
 
 '''___init___ tests'''
 
@@ -49,7 +49,7 @@ def test_negative_piece_pxl_hex():
 def test_large_piece_pxl_hex():
     """Ensures proper function when a piece has a pixel-hex > 64-bits"""
     with pytest.raises(PiecePixelHexOutOfBoundsException):
-        Piece('t', 2**64, Board.empty())
+        Piece('t', 2 ** 64, Board.empty())
 
 
 def test_piece_pxl_hex_immutability():
@@ -133,9 +133,9 @@ class SimplePiece(Piece):
         '''
         Calls parent constructor for test class
         '''
-        super().__init__(piece_char, piece_pxl_hex,
-                         board, current_coords,
-                         player_controller)
+        super().__init__(
+            piece_char, piece_pxl_hex, board, current_coords, player_controller
+        )
 
     def list_moves(self) -> list[Optional[tuple[int, int]],]:
         '''

@@ -7,7 +7,7 @@ This idea is still in its infancy, but its structure is well defined (and becomi
 The base set in `/sets/base_set` is an example of the file structure and specifications that are used to define the base rules of chess.
 
 ## How to Use
-In a command window, go to the `src` directory and run `python3 core/main.py`
+In a command window, go to the `omc` directory and run `python3 core/main.py`
 
 ## Making a Set
 ### Piece Specification
@@ -37,18 +37,18 @@ Order of validation:
  * lose
 
 ## Testing
-Tests are located in the `src/tests` directory. Test files follow the naming scheme `test_{name_of_file_tested}`. Test classes follow the naming scheme `Test{NameOfMethodBeingTested}` and each test follows the naming scheme `test_{description_of_test}`.
+Tests are located in the `omc/tests` directory. Test files follow the naming scheme `test_{name_of_file_tested}`. Test classes follow the naming scheme `Test{NameOfMethodBeingTested}` and each test follows the naming scheme `test_{description_of_test}`.
 
 Some tests require specific set conditions, these sets can be found in `sets/test_sets` and follow the naming scheme `test_set_{description_of_test}[_testsetnum]` where the `description_of_test` is the same as the testing method that uses the set and `testsetnum` is an optional number used if a test requires multiple test sets.
 
-To run all the tests, in a command window go to the `src` directory and run `python3 -m unittest -v`.
+To run all the tests, in a command window go to the `omc` directory and run `python3 -m unittest -v`.
 
 ## Repo Structure
 ```
 open-modular-chess
 │   README.md (This Document)
 │   LICENSE (Standard MIT License)
-└───src
+└───omc
 |   └───core
 |   |       __init__.py (Package Managing)
 |   |       load_set.py (Used for loading sets into play)

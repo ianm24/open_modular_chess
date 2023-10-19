@@ -3,20 +3,17 @@ from typing import Optional
 
 import numpy as np
 from numpy import ndarray
-from queen import Queen
 
-from src.core.model.board import Board
-from src.core.model.piece import Piece
+from omc.core.model.board import Board
+from resources.sets.base_set.helper.chess_piece import ChessPiece
+from resources.sets.base_set.pieces.queen import Queen
 
 
-class Pawn(Piece):
+class Pawn(ChessPiece):
     """Object representing a pawn piece."""
 
-    __slots__ = ('_piece_char', '_piece_pxl_hex', '_board',
-                 '_current_coords', '_player_controller', '_direction')
-
-    _default_piece_char: str = 'P'
-    _default_piece_pxl_hex: int = 0x183C3C1818183C7E
+    DEFAULT_PIECE_CHAR: str = 'P'
+    DEFAULT_PIECE_PIXEL_HEX: int = 0x183C3C1818183C7E
 
     def __init__(
             self, board: Board,
@@ -49,8 +46,8 @@ class Pawn(Piece):
         super().__init__(
             board, piece_char, piece_pxl_hex, current_coords, player_controller
         )
-        self._direction = np.array(
-            [0, 1] if self._moving_down() else [0, -1]
+        self.DIRECTIONS = (
+            np.array([0, 1] if self._moving_down() else [0, -1]),
         )
 
     def _moving_down(self) -> bool:
@@ -72,36 +69,37 @@ class Pawn(Piece):
         """
         moves = []
 
-        # Consider open spaces
-        # Check space in front
-        move_f = self._current_coords + self._direction
-        if self._board.query_space(move_f) is None:
-            moves.append(move_f)
+        for direction in self.DIRECTIONS:
+            # Consider open spaces
+            # Check space 1 in front
+            move_f = self._current_coords + direction
+            if self._board.query_space(move_f) is None:
+                moves.append(move_f)
 
-        # Check space 2 in front (if in starting spot)
-        move_ff = self._current_coords + (2 * self._direction)
-        if (
-                self._current_coords == self._starting_coords
-                and self._board.query_space(move_ff) is None
-        ):
-            moves.append(move_ff)
+            # Check space 2 in front (if in starting spot)
+            move_ff = self._current_coords + (2 * direction)
+            if (
+                    self._current_coords == self._starting_coords
+                    and self._board.query_space(move_ff) is None
+            ):
+                moves.append(move_ff)
 
-        # Consider captures
-        move_fl = self._current_coords + self._direction + np.array([1, 0])
-        player_fl = self._board.query_space(move_fl)
-        if (
-                player_fl is not None
-                and player_fl.player_controller != self._player_controller
-        ):
-            moves.append(move_fl)
+            # Consider captures
+            move_fl = self._current_coords + direction + np.array([1, 0])
+            player_fl = self._board.query_space(move_fl)
+            if (
+                    player_fl is not None
+                    and player_fl.player_controller != self._player_controller
+            ):
+                moves.append(move_fl)
 
-        move_fr = self._current_coords + self._direction + np.array([-1, 0])
-        player_fr = self._board.query_space(move_fr)
-        if (
-                player_fr is not None
-                and player_fr.player_controller != self._player_controller
-        ):
-            moves.append(move_fr)
+            move_fr = self._current_coords + direction + np.array([-1, 0])
+            player_fr = self._board.query_space(move_fr)
+            if (
+                    player_fr is not None
+                    and player_fr.player_controller != self._player_controller
+            ):
+                moves.append(move_fr)
 
         return moves
 
@@ -120,7 +118,7 @@ class Pawn(Piece):
 
     def move(self, coords: ndarray[int]) -> bool:
         """
-        Performs an action on the piece using arguments
+        Performs an action on the piece using arguments.
 
         :param coords: Coordinates of the attempted move
         :type coords: ndarray[int]
@@ -146,15 +144,13 @@ class Pawn(Piece):
         promotion_zone = self._get_promotion_zone()
         if coords[1] == promotion_zone:
             # TODO request promotion input from user
-            self._board.add_piece(
-                Queen(
-                    self._board,
-                    self._piece_char,
-                    self._piece_pxl_hex,
-                    self._current_coords,
-                    self._player_controller
-                )
-            )
+            self._board.add_piece(Queen(
+                self._board,
+                self._piece_char,
+                self._piece_pxl_hex,
+                self._current_coords,
+                self._player_controller
+            ))
 
         self._current_coords = coords
         return True
