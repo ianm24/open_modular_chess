@@ -8,6 +8,7 @@ from omc.core.exception.exception import NegativePiecePlayerNumException
 from omc.core.exception.exception import NonCurrentPiecePlayerNumException
 from omc.core.exception.exception import PiecePixelHexOutOfBoundsException
 from omc.core.exception.exception import PieceSubclassInvalidException
+from omc.core.exception.exception import PlayerNotControllingPieceException
 from omc.core.model.board import Board
 from omc.core.model.board import Piece
 from omc.core.model.board import Player
