@@ -23,7 +23,7 @@ class EmptyBoardException(AbstractOpenModularChessException):
 
 
 class InvalidBoardFormatException(AbstractOpenModularChessException):
-    """"""
+    """CSV Reader failed to parse the file format"""
 
 
 class InvalidBoardLayoutException(AbstractOpenModularChessException):
@@ -56,3 +56,11 @@ class NegativePieceCoordinatesException(AbstractOpenModularChessException):
 
 class NonCurrentPiecePlayerNumException(AbstractOpenModularChessException):
     """Piece player controller set to a non-current player"""
+
+
+class PieceSubclassInvalidException(AbstractOpenModularChessException):
+    """Subclassing of Piece object is invalid or incomplete"""
+
+
+class PieceAlreadyAtLocationException(AbstractOpenModularChessException):
+    """Piece attempted to place on top of other piece without replacement"""

@@ -1,6 +1,7 @@
 # Code by Chandler McDowell 2023
 import ast
 import csv
+import importlib
 import re
 from os import listdir
 from os.path import abspath
@@ -9,6 +10,10 @@ from os.path import exists
 from os.path import isdir
 from os.path import isfile
 from os.path import join
+from typing import Callable
+from typing import TypeVar
+
+import numpy as np
 
 from src.core.exception.exception import BoardNotFoundException
 from src.core.exception.exception import BoardValidationFailedException
@@ -20,6 +25,7 @@ from src.core.exception.exception import PiecesEmptyException
 from src.core.exception.exception import PiecesNotFoundException
 from src.core.exception.exception import SetNotFoundException
 from src.core.model.board import Board
+from src.core.model.player import Player
 
 ''' File path to 'sets' directory '''
 SETS_DIR = dirname(abspath(__file__)) + '/../../resources/sets/'
@@ -35,6 +41,10 @@ BOARD_FILE_NAME = '/board.csv'
 
 ''' Number of values that should be in a board file '''
 NUM_BOARD_VALS = 3
+
+
+''' TypeVar representing subclasses of "Piece" '''
+P = TypeVar('P', bound=Callable[..., object])
 
 
 def load_set(set_name: str) -> list:
@@ -54,27 +64,24 @@ def load_set(set_name: str) -> list:
         raise SetNotFoundException(
             f'\nError: The set {set_name} is not in the sets directory.')
 
-    return []  # TODO remove
-
-    # pieces = get_pieces(set_name)
-    # board = get_board(set_name)
+    piece_map: dict[str, P] = get_piece_map(set_name)
+    board: Board = get_board(set_name, piece_map)
     # win = get_win(set_name)
     # lose = get_lose(set_name)
 
+    return [board]
     # return [[pieces,board,win,lose], None]
 
 
-def get_piece_names(set_name: str, test_flag=None) -> list[str]:
+def get_piece_map(set_name: str) -> dict[str, P]:
     """
-    Gets the name of all pieces in a set
+    Gets all piece objects in a set
 
-    :param test_flag:
     :param set_name: The selected set's folder name inside the 'sets' directory
     :type set_name: str
-    :return: Names of every piece in the set
-    :rtype: list
+    :return: Piece objects in the set
+    :rtype: list[Piece]
     """
-
     # Gets file_path for pieces
     file_path = SETS_DIR + set_name + SET_PIECES_DIR
 
@@ -84,11 +91,20 @@ def get_piece_names(set_name: str, test_flag=None) -> list[str]:
             f"directory."
         )
 
-    pieces = [file.replace('.csv', '') for file in listdir(
-        file_path) if isfile(join(file_path, file))]
-
-    if test_flag:
-        print(pieces)
+    # Load the class dynamically
+    pieces: dict[str, P] = {}
+    for file_name in listdir(file_path):
+        if (
+                not isfile(join(file_path, file_name))
+                or not file_name.endswith('.py')
+        ):
+            continue
+        piece_name = file_name.partition('.py')[0]
+        piece_class_name = piece_name.title()
+        loader = importlib.machinery.SourceFileLoader(
+            piece_class_name, file_name)
+        piece_class = getattr(loader.load_module(), piece_class_name)
+        pieces[piece_name] = piece_class
 
     if not pieces:
         raise PiecesEmptyException(
@@ -96,24 +112,22 @@ def get_piece_names(set_name: str, test_flag=None) -> list[str]:
             f'empty.'
         )
 
-    # Sort in alphabetical order
-    pieces.sort()
-
     return pieces
 
 
-def get_board(set_name: str) -> Board:
+def get_board(set_name: str, piece_map: dict[str, P]) -> Board:
     """
     Gets the board information for a set
 
+    :param piece_map:
+    :type piece_map: dict[str, PieceClass]
     :param set_name: The selected set's folder name inside the 'sets' directory
     :type set_name: str
     :return: board - The loaded board
-    :rtype: list
+    :rtype: Board
     """
 
     # Initializes empty board and establishes file_path to set's board file
-    board = Board.empty()
     file_path = SETS_DIR + set_name + BOARD_FILE_NAME
 
     print(file_path)
@@ -149,16 +163,17 @@ def get_board(set_name: str) -> Board:
     if len(raw_layout) == 0:
         raise EmptyBoardException(
             f'\nError: The file {file_path} for set {set_name} appears to be '
-            f'empty.')
+            f'empty.'
+        )
 
     # Tries to get integer dimension
     try:
         rows = int(raw_rows)
     except ValueError:
         raise InvalidBoardDimensionException(
-            f'\nError: Invalid board dimension type in set {set_name}. '
-            f"The dimensions should be of type {int}. This set's "
-            f'row dimension is of type {type(board.rows)}.'
+            f'\nError: Unable to parse board row dimension in set'
+            f' {set_name}. The dimension should be of type {int}. This'
+            f' row dimension is {raw_rows}.'
         )
 
     # Tries to get integer dimension
@@ -166,24 +181,54 @@ def get_board(set_name: str) -> Board:
         columns = int(raw_columns)
     except ValueError:
         raise InvalidBoardDimensionException(
-            f'\nError: Invalid board dimension type in set {set_name}. '
-            f"The dimensions should be of type {int}. This set's "
-            f'column dimension is of type {type(board.columns)}.'
+            f'\nError: Unable to parse board column dimension in set'
+            f' {set_name}. The dimension should be of type {int}. This'
+            f' column dimension is {raw_columns}.'
         )
 
     # Converts from string to list
-    layout = []
     try:
         # TODO fix this nasty nasty danger code
-        layout = ast.literal_eval(raw_layout)
+        piece_name_layout: list = ast.literal_eval(raw_layout)
     except ValueError:
         raise InvalidBoardLayoutException(
-            f'\nError: Board layout in set {set_name} contains an invalid '
-            f'value type. '
-            f'Ensure that all strings have quotes around them.'
+            f'\nError: Board layout in set {set_name} contains an invalid'
+            f' value type. Ensure that all strings have quotes around them.'
         )
 
-    board = Board(rows, columns, layout)
+    def get_player_number_from_raw_piece_name(raw_piece_name: str) -> int:
+        return int(raw_piece_name.partition('_')[0].lstrip('p'))
+
+    player_numbers = {
+        get_player_number_from_raw_piece_name(x)
+        for x in np.array(piece_name_layout).flatten()
+    }
+
+    # inst empty board
+    board = Board.empty(np.array([columns, rows]))
+
+    # inst players
+    players = {pn: Player(pn) for pn in player_numbers}
+
+    # assign players -> board
+    for player in players.values():
+        board.add_player(player)
+
+    # inst pieces
+    def piece_map_func(raw_piece_name):
+        # converts raw piece name to the initial controlling player number
+        # p2_pawn -> ('p2', '_', 'pawn') -> 'p2' -> '2' -> 2
+        player_number = get_player_number_from_raw_piece_name(raw_piece_name)
+        return piece_map.get(raw_piece_name)(player_controller=player_number)
+
+    layout = piece_map_func(np.array(piece_name_layout))
+
+    # assign pieces -> players and pieces -> board
+    flattened_layout = layout.flatten()
+    for piece in flattened_layout:
+        piece_owner = piece.player_controller
+        players[piece_owner].add_piece(piece)
+        board.add_piece(piece)
 
     # Tries to validate board and returns it if successful
     valid = validate_board(board, set_name)
@@ -208,8 +253,8 @@ def validate_board(board: Board, set_name: str) -> bool:
     """
 
     board_layout = board.layout
-    num_rows = board.rows
-    num_cols = board.columns
+    num_rows = board.dimensions[1]
+    num_cols = board.dimensions[0]
 
     # Valid board dimensions check
     if num_rows < 1 or num_cols < 1:
@@ -263,7 +308,7 @@ def validate_board(board: Board, set_name: str) -> bool:
                     )
 
                 # Check for valid piece suffix
-                piece_names = get_piece_names(set_name)
+                piece_names: set[str] = set(get_piece_map(set_name).keys())
                 has_piece_suffix = False
                 for name in piece_names:
                     piece = re.search(name, curr_cell)
