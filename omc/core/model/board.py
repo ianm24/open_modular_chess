@@ -4,7 +4,6 @@ from typing import Any
 from typing import cast
 from typing import Collection
 from typing import MutableSet
-from typing import Optional
 
 import numpy as np
 from numpy import ndarray
@@ -12,7 +11,6 @@ from numpy import ndarray
 from omc.core.exception.exception import NegativePieceCoordinatesException
 from omc.core.exception.exception import NegativePiecePlayerNumException
 from omc.core.exception.exception import NonCurrentPiecePlayerNumException
-from omc.core.exception.exception import PieceAlreadyAtLocationException
 from omc.core.exception.exception import PiecePixelHexOutOfBoundsException
 from omc.core.exception.exception import PieceSubclassInvalidException
 
@@ -24,40 +22,40 @@ class Board:
     """
 
     def __init__(
-            self, dimensions: ndarray[int],
-            layout: ndarray[Player | None]
+            self, dimensions: tuple[int, ...],
+            layout: ndarray[Piece | None]
     ):
         """
         Initialize an instance of Board.
 
         :param dimensions: Dimensions of the board
-        :type dimensions: ndarray[int]
+        :type dimensions: tuple[int, ...]
         :param layout: Layout of pieces on the board
-        :type layout: ndarray[Optional[Piece]]
+        :type layout: ndarray[Piece | None]
         """
-        self._dimensions: ndarray[int] = dimensions
-        self._layout: ndarray[Player | None] = layout
+        self._dimensions: tuple[int, ...] = dimensions
+        self._layout: ndarray[Piece | None] = layout
         self._players: dict[int, Player] = dict()
 
     @classmethod
-    def empty(cls, dimensions: ndarray[int]) -> Board:
+    def empty(cls, dimensions: tuple[int, ...]) -> Board:
         """
         Instantiate an empty board.
 
         :param dimensions: Dimensions of board
-        :type dimensions: ndarray[int]
+        :type dimensions: tuple[int, ...]
         :return: Empty board instance
         :rtype: Board
         """
         return Board(dimensions, np.empty(tuple(dimensions), dtype=object))
 
     @property
-    def dimensions(self) -> ndarray[int]:
+    def dimensions(self) -> tuple[int, ...]:
         """
         Get dimensions of the board.
 
         :return: Dimensions of the board
-        :rtype: ndarray[int]
+        :rtype: tuple[int, ...]
         """
         return self._dimensions
 
@@ -71,68 +69,75 @@ class Board:
         """
         return self._layout
 
+    def add_piece(self, piece: Piece) -> bool:
+        """
+        Add a piece to the board.
+
+        :param piece: The piece to add
+        :type piece: Piece
+        :return: Whether piece addition was successful
+        :rtype: bool
+        """
+        if self.query_space(piece.current_coords) is not None:
+            print("There is already a piece at this location on the board.")
+            return False
+        self._layout[tuple(piece.current_coords)] = piece
+        return True
+
+    def remove_piece(self, piece: Piece) -> bool:
+        """
+        Remove a piece from the board.
+
+        :param piece: The piece to remove
+        :type piece: Piece
+        :return: Whether piece removal was successful
+        :rtype: bool
+        """
+        if self.query_space(piece.current_coords) != piece:
+            print("The piece to remove does not belong to this board.")
+            return False
+        self._layout[tuple(piece.current_coords)] = None
+        return True
+
     @property
     def current_players(self) -> dict[int, Player]:
         """
         Get current players on the board.
 
         :return: Current players on the board
-        :rtype: ndarray[int]
+        :rtype: tuple[int, ...]
         """
         return self._players
 
-    def add_piece(self, piece_: Piece, replace_existing: bool = False) -> None:
-        """
-        Add a piece to the board.
-
-        :param piece_: The piece to add
-        :type piece_: Piece
-        :param replace_existing: Whether to replace an existing piece at the
-            same location
-        :rtype: bool
-        :return: None
-        """
-        current_piece = cast(
-            Optional[Piece],
-            self.layout[tuple(piece_.current_coords)]
-        )
-        if current_piece and not replace_existing:
-            raise PieceAlreadyAtLocationException(
-                f'Cannot add {piece_.__class__.__name__} to the board because'
-                f' {current_piece.__class__.__name__} already present at the'
-                f' location {current_piece.current_coords}'
-            )
-        self._layout[tuple(piece_.current_coords)] = piece_
-
-    def remove_piece(self, piece_: Piece) -> None:
-        """
-        Remove a piece from the board.
-
-        :param piece_: The piece to remove
-        :type piece_: Piece
-        :return: None
-        """
-        self._layout[tuple(piece_.current_coords)] = None
-
-    def add_player(self, player_: Player) -> None:
+    def add_player(self, player: Player) -> bool:
         """
         Add a player to the board.
 
-        :param player_: Player to add to the board
-        :type player_: Player
-        :return: None
+        :param player: Player to add to the board
+        :type player: Player
+        :return: Whether player addition was successful
+        :rtype: bool
         """
-        self._players[player_.player_number] = player_
+        if player.player_number in self._players:
+            print("The player to add is already on the board.")
+            return False
+        self._players[player.player_number] = player
+        return True
 
-    def remove_player(self, player_: Player) -> None:
+    def remove_player(self, player: Player) -> bool:
         """
         Remove a player from the board.
 
-        :param player_: Player to remove from the board
-        :type player_: Player
-        :return: None
+        :param player: Player to remove from the board
+        :type player: Player
+        :return: Whether player removal was successful
+        :rtype: bool
         """
-        self._players[player_.player_number] = player_
+        if player.player_number not in self._players:
+            print("The player to remove isn't on the board.")
+            return False
+        del self._players[player.player_number]
+        return True
 
     def get_player(self, player_number: int) -> Player:
         """
@@ -156,34 +161,39 @@ class Board:
         """
         if isinstance(other, Board):
             return (
-                np.array_equal(self.dimensions, other.dimensions)
-                and np.array_equal(self.layout, other.layout)
+                self.dimensions == other.dimensions
+                and self.layout == other.layout
                 and self.current_players == other.current_players
             )
         return False
 
-    def on_board(self, space: ndarray[int]) -> bool:
+    def on_board(self, space: tuple[int, ...]) -> bool:
         """
         Query whether a space is on the board
 
         :param space: coordinate denoting the space to be queried
-        :type space: ndarray[int]
+        :type space: tuple[int, ...]
         :return: Whether the space is on the board
         :rtype: bool
         """
-        return bool((space >= 0 or space < self._dimensions).all())
+        return all(
+            [
+                0 <= coord < dim
+                for coord, dim in zip(space, self._dimensions)
+            ]
+        )
 
-    def query_space(self, space: ndarray[int]) -> Piece | None:
+    def query_space(self, space: tuple[int, ...]) -> Piece | None:
         """
         Query a space for what piece exists there, if any, or None otherwise.
 
         :param space: coordinate denoting the space to be queried
-        :type space: ndarray[int]
+        :type space: tuple[int, ...]
         :return: Piece at the queried space in the layout
-        :rtype: Optional[Piece]
+        :rtype: Piece | None
         """
         try:
-            return cast(Optional[Piece], self._layout[tuple(space)])
+            return cast(Piece | None, self._layout[space])
         except IndexError:
             return None  # Handle out-of-bounds coordinates
 
@@ -198,30 +208,30 @@ class Piece:
     DEFAULT_PIECE_PIXEL_HEX: int = 0
 
     def __init__(
-            self, board_: Board,
+            self, board: Board,
             piece_char: str | None = None,
             piece_pxl_hex: int | None = None,
-            current_coords: ndarray[int] | None = None,
+            current_coords: tuple[int, ...] | None = None,
             player_controller: int | None = None
     ):
         """
         Initialize an instance of Piece.
 
-        :param board_: The board the piece belongs to.
-        :type board_: Board
+        :param board: The board the piece belongs to.
+        :type board: Board
         :param piece_char: 1-character string that represent the piece in
             the command line display. Default is set by subclass.
-        :type piece_char: Optional[str]
+        :type piece_char: str | None
         :param piece_pxl_hex: Hex value of 64-bit number representing an
             8x8 pixel grid to display the piece in a GUI. Default is set
             by subclass.
-        :type piece_pxl_hex: Optional[int]
+        :type piece_pxl_hex: int | None
         :param current_coords: Represents the current placement of the
-            piece on the board. Default is (0,0).
-        :type current_coords: Optional[ndarray[int]]
+            piece on the board. Default is (0, 0).
+        :type current_coords: tuple[int, ...] | None
         :param player_controller: The player controlling this piece.
             Default is 1.
-        :type player_controller: Optional[int]
+        :type player_controller: int | None
         """
         # Assertions to validate subclassing
         if self.__class__.__name__ == 'Piece':
@@ -255,13 +265,13 @@ class Piece:
             piece_pxl_hex = self.DEFAULT_PIECE_PIXEL_HEX
 
         if current_coords is None:
-            current_coords = np.zeros(len(board_.dimensions), dtype=int)
+            current_coords = tuple([0] * len(board.dimensions))
 
         if player_controller is None:
             player_controller = 1
 
         # Set values
-        self._board = board_
+        self._board = board
 
         if len(piece_char) > 1:
             print(
@@ -283,13 +293,6 @@ class Piece:
                 f" is {piece_pxl_hex} which is not between 1 and 2^64 - 1."
             )
 
-        if piece_pxl_hex < 1 or piece_pxl_hex > (2 ** 64) - 1:
-            raise PiecePixelHexOutOfBoundsException(
-                "Error: Piece pixel-hex for"
-                f" {self.__class__.__name__} is out of bounds. Pixel-hex"
-                f" is {piece_pxl_hex} which is not between 1 and 2^64 - 1."
-            )
-
         self._piece_pxl_hex = piece_pxl_hex
 
         if current_coords[0] < 0 or current_coords[1] < 0:
@@ -297,7 +300,7 @@ class Piece:
                 "Error: Piece coordinates for"
                 f" {self.__class__.__name__} are negative. Coordinates"
                 f" are {current_coords} which should be greater or equal"
-                " to (0,0)")
+                " to (0, 0)")
 
         self._current_coords = current_coords
         self._starting_coords = current_coords
@@ -352,12 +355,12 @@ class Piece:
         return list(self._board.current_players.keys())
 
     @property
-    def current_coords(self) -> ndarray[int]:
+    def current_coords(self) -> tuple[int, ...]:
         """
         Gets the current coordinates of the piece
 
         :return: Current player coordinate
-        :rtype: ndarray[int]
+        :rtype: tuple[int, ...]
         """
         return self._current_coords
 
@@ -371,23 +374,23 @@ class Piece:
         """
         return self._player_controller
 
-    def list_moves(self) -> list[ndarray[int] | None]:
+    def list_moves(self) -> list[tuple[int, ...]]:
         """
         Gives a list of all available moves for the piece.
 
         :return: List of moves currently able to be performed by
             the piece.
-        :rtype: list[Optional[ndarray[int]]]
+        :rtype: list[tuple[int, ...]]
         """
 
         raise NotImplementedError
 
-    def move(self, coords: ndarray[int]) -> bool:
+    def move(self, coords: tuple[int, ...]) -> bool:
         """
         Performs an action on the piece using arguments.
 
         :param coords: Coordinates for the space of the attempted move.
-        :type coords: ndarray[int]
+        :type coords: tuple[int, ...]
         :return: True on successful move, False otherwise.
         :rtype: bool
         """
@@ -397,24 +400,13 @@ class Piece:
             print("Invalid Move.")
             return False
 
+        self._board.remove_piece(self)
         self._current_coords = coords
+        capture_piece = self._board.query_space(coords)
+        if capture_piece is not None:
+            self._board.remove_piece(capture_piece)
+        self._board.add_piece(self)
         return True
-
-    def capture(self, new_player: int) -> bool:
-        """
-        Attempt to capture this piece, removing it from the board and giving
-        possession of the piece to `new_player`.
-
-        :param new_player: Player number for the player capturing this piece
-        :type new_player: int
-        :return: True on successful capture, False otherwise.
-        :rtype: bool
-        """
-        if self.set_player_control(new_player):
-            self._current_coords = None
-            self._board.remove_piece(self)
-            return True
-        return False
 
     def set_player_control(self, new_player: int) -> bool:
         """
@@ -436,10 +428,13 @@ class Piece:
             print(f"Invalid Player Number. (Valid Numbers: {valid_players})")
             return False
 
+        self._board.current_players[self._player_controller].remove_piece(self)
         self._player_controller = new_player
+        self._board.current_players[new_player].remove_piece(self)
         return True
 
-    def list_actions(self) -> list[str]:
+    @classmethod
+    def list_actions(cls) -> list[str]:
         """
         Gives a list of all available actions for the piece.
 
@@ -470,7 +465,7 @@ class Piece:
         if action == "move":
             num_dimensions = len(self._board.dimensions)
             try:
-                coords = np.array([
+                coords = tuple([
                     int(args[i]) for i in range(num_dimensions)
                 ])
             except IndexError:
@@ -495,6 +490,25 @@ class Piece:
 
             return self.set_player_control(player_controller)
 
+        return False
+
+    def __eq__(self, other: Any):
+        """
+        Compare this instance to another instance for equality.
+
+        :param other: The other instance to compare to.
+        :type other: Any
+        :return: True if the instances are considered equal, False otherwise.
+        :rtype: bool
+        """
+        if isinstance(other, Piece):
+            return (
+                self.current_coords == other.current_coords
+                and self.current_players == other.current_players
+                and self.player_controller == other.player_controller
+                and self.piece_pxl_hex == other.piece_pxl_hex
+                and self.piece_char == other.piece_char
+            )
         return False
 
 
@@ -534,12 +548,51 @@ class Player:
         """
         return self._pieces
 
-    def add_piece(self, piece_: Piece) -> None:
+    def add_piece(self, piece: Piece) -> bool:
         """
         Add a piece to the collection owned by the player.
 
-        :param piece_: Piece to be added
-        :type piece_: Piece
-        :return: None
+        :param piece: Piece to be added
+        :type piece: Piece
+        :return: Whether the piece removal was successful
+        :rtype: bool
         """
-        self._pieces.add(piece_)
+        if piece.player_controller != self.player_number:
+            print("The piece to add is not controlled by this player.")
+            return False
+        if piece in self._pieces:
+            print("The piece to add is already controlled by this player.")
+            return False
+        self._pieces.add(piece)
+        return True
+
+    def remove_piece(self, piece: Piece) -> bool:
+        """
+        Add a piece to the collection owned by the player.
+
+        :param piece: Piece to be added
+        :type piece: Piece
+        :return: Whether the piece removal was successful
+        :rtype: bool
+        """
+        if piece not in self._pieces:
+            print("The piece to remove is not controlled by this player.")
+            return False
+        self._pieces.remove(piece)
+        return True
+
+    def __eq__(self, other: Any):
+        """
+        Compare this instance to another instance for equality.
+
+        :param other: The other instance to compare to.
+        :type other: Any
+        :return: True if the instances are considered equal, False otherwise.
+        :rtype: bool
+        """
+        if isinstance(other, Player):
+            return (
+                self.player_number == other.player_number
+                and self.pieces == other.pieces
+            )
+        return False
