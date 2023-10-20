@@ -1,7 +1,4 @@
 from typing import Iterable
-from typing import Optional
-
-from numpy import ndarray
 
 from omc.core.model.board import Piece
 
@@ -13,15 +10,15 @@ class ChessPiece(Piece):
     MULTI_STEP: bool = False
 
     # Each direction to consider for valid moves
-    DIRECTIONS: Iterable[ndarray] = tuple()
+    DIRECTIONS: Iterable[tuple[int, ...]] = tuple()
 
-    def list_moves(self) -> list[Optional[ndarray[int]]]:
+    def list_moves(self) -> list[tuple[int, ...]]:
         """
         Gives a list of all available moves for the piece.
 
         :return: List of moves currently able to be performed by
             the piece.
-        :rtype: list[Optional[ndarray[int]]]
+        :rtype: list[tuple[int, ...]]
         """
 
         moves = []
@@ -46,30 +43,3 @@ class ChessPiece(Piece):
                 try_move += direction
 
         return moves
-
-    def move(self, coords: ndarray[int]) -> bool:
-        """
-        Performs an action on the piece using arguments
-
-        :param coords: Coordinates of the attempted move
-        :type coords: ndarray[int]
-        :return: True on successful move, False otherwise.
-        :rtype: bool
-        """
-
-        # Check if move is valid
-        if coords not in self.list_moves():
-            print("Invalid Move.")
-            return False
-
-        other_piece = self._board.query_space(coords)
-
-        # Check for capture
-        if (
-                other_piece is not None
-                and other_piece.player_controller != self._player_controller
-        ):
-            other_piece.capture(self._player_controller)
-
-        self._current_coords = coords
-        return True

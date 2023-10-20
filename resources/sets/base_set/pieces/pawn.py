@@ -1,8 +1,4 @@
 from typing import cast
-from typing import Optional
-
-import numpy as np
-from numpy import ndarray
 
 from omc.core.model.board import Board
 from resources.sets.base_set.helper.chess_piece import ChessPiece
@@ -17,10 +13,10 @@ class Pawn(ChessPiece):
 
     def __init__(
             self, board: Board,
-            piece_char: Optional[str] = None,
-            piece_pxl_hex: Optional[int] = None,
-            current_coords: Optional[tuple[int, int]] = None,
-            player_controller: Optional[int] = None
+            piece_char: str | None = None,
+            piece_pxl_hex: int | None = None,
+            current_coords: tuple[int, ...] | None = None,
+            player_controller: int | None = None
     ):
         """
         Initialize an instance of Pawn. Calls the superclass constructor, but
@@ -31,24 +27,22 @@ class Pawn(ChessPiece):
         :type board: Board
         :param piece_char: 1-character string that represent the piece in
             the command line display. Default is set by subclass.
-        :type piece_char: Optional[str]
+        :type piece_char: str | None
         :param piece_pxl_hex: Hex value of 64-bit number representing an
             8x8 pixel grid to display the piece in a GUI. Default is set
             by subclass.
-        :type piece_pxl_hex: Optional[int]
+        :type piece_pxl_hex: int | None
         :param current_coords: Represents the current placement of the
-            piece on the board. Default is (0,0).
-        :type current_coords: Optional[ndarray[int]]
+            piece on the board. Default is (0, 0).
+        :type current_coords: tuple[int, ...] | None
         :param player_controller: The player controlling this piece.
             Default is 1.
-        :type player_controller: Optional[int]
+        :type player_controller: int | None
         """
         super().__init__(
             board, piece_char, piece_pxl_hex, current_coords, player_controller
         )
-        self.DIRECTIONS = (
-            np.array([0, 1] if self._moving_down() else [0, -1]),
-        )
+        self.DIRECTIONS = ((0, 1),) if self._moving_down() else ((0, -1),)
 
     def _moving_down(self) -> bool:
         """
@@ -59,25 +53,25 @@ class Pawn(ChessPiece):
         """
         return self._player_controller % 2 == 1
 
-    def list_moves(self) -> list[Optional[ndarray[int]]]:
+    def list_moves(self) -> list[tuple[int, ...]]:
         """
         Gives a list of all available moves for the piece.
 
         :return: List of moves currently able to be performed by
             the piece.
-        :rtype: list[Optional[ndarray[int]]]
+        :rtype: list[tuple[int, ...]]
         """
         moves = []
 
         for direction in self.DIRECTIONS:
             # Consider open spaces
             # Check space 1 in front
-            move_f = self._current_coords + direction
+            move_f = tuple(self._current_coords + direction)
             if self._board.query_space(move_f) is None:
                 moves.append(move_f)
 
             # Check space 2 in front (if in starting spot)
-            move_ff = self._current_coords + (2 * direction)
+            move_ff = tuple(self._current_coords + (2 * direction))
             if (
                     self._current_coords == self._starting_coords
                     and self._board.query_space(move_ff) is None
@@ -85,7 +79,7 @@ class Pawn(ChessPiece):
                 moves.append(move_ff)
 
             # Consider captures
-            move_fl = self._current_coords + direction + np.array([1, 0])
+            move_fl = tuple(self._current_coords + direction + (1, 0))
             player_fl = self._board.query_space(move_fl)
             if (
                     player_fl is not None
@@ -93,7 +87,7 @@ class Pawn(ChessPiece):
             ):
                 moves.append(move_fl)
 
-            move_fr = self._current_coords + direction + np.array([-1, 0])
+            move_fr = tuple(self._current_coords + direction + (-1, 0))
             player_fr = self._board.query_space(move_fr)
             if (
                     player_fr is not None
@@ -116,33 +110,22 @@ class Pawn(ChessPiece):
         else:
             return cast(int, self._board.dimensions[1]) - 1
 
-    def move(self, coords: ndarray[int]) -> bool:
+    def move(self, coords: tuple[int, ...]) -> bool:
         """
         Performs an action on the piece using arguments.
 
         :param coords: Coordinates of the attempted move
-        :type coords: ndarray[int]
+        :type coords: tuple[int, ...]
         :return: True on successful move, False otherwise.
         :rtype: bool
         """
+        moved = super().move(coords)
 
-        # Check if move is valid
-        if coords not in self.list_moves():
-            print("Invalid Move.")
+        if not moved:
             return False
 
-        other_piece = self._board.query_space(coords)
-
-        # Check for capture
-        if (
-                other_piece is not None
-                and other_piece.player_controller != self._player_controller
-        ):
-            other_piece.capture(self._player_controller)
-
         # Check for promote
-        promotion_zone = self._get_promotion_zone()
-        if coords[1] == promotion_zone:
+        if coords[1] == self._get_promotion_zone():
             # TODO request promotion input from user
             self._board.add_piece(Queen(
                 self._board,
@@ -152,5 +135,4 @@ class Pawn(ChessPiece):
                 self._player_controller
             ))
 
-        self._current_coords = coords
         return True
