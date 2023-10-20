@@ -6,6 +6,7 @@ import pytest
 from omc.core.exception.exception import NegativePieceCoordinatesException
 from omc.core.exception.exception import NegativePiecePlayerNumException
 from omc.core.exception.exception import NonCurrentPiecePlayerNumException
+from omc.core.exception.exception import PieceAlreadyAtLocationException
 from omc.core.exception.exception import PiecePixelHexOutOfBoundsException
 from omc.core.exception.exception import PieceSubclassInvalidException
 from omc.core.exception.exception import PlayerNotControllingPieceException
@@ -14,8 +15,6 @@ from omc.core.model.board import Piece
 from omc.core.model.board import Player
 
 '''Board Class Tests'''
-
-'''Piece Class Tests'''
 
 
 class SimplePiece(Piece):
@@ -31,6 +30,233 @@ class SimplePiece(Piece):
         Implements list_moves for testing
         """
         return [np.asarray([0, 1])]
+
+
+'''AddPiece Tests'''
+
+
+def test_board_add_piece():
+    """
+    Ensures proper function when adding a replacing piece
+    """
+    b = Board.empty(np.array([8, 8]))
+    b.add_player(Player(1))
+    p = SimplePiece(b)
+    b.add_piece(p)
+
+    assert b.query_space(np.asarray([0, 0])) == p
+
+
+def test_add_same_coordinates_nonreplacing_piece():
+    """
+    Ensures proper function when adding a piece with incorrect
+    replace flag
+    """
+    b = Board.empty(np.array([8, 8]))
+    b.add_player(Player(1))
+    p1 = SimplePiece(b)
+    b.add_piece(p1)
+    p2 = SimplePiece(b)
+
+    with pytest.raises(PieceAlreadyAtLocationException):
+        b.add_piece(p2, False)
+    assert b.query_space(np.asarray([0, 0])) == p1
+
+
+def test_add_replacing_piece():
+    """
+    Ensures proper function when adding a replacing piece
+    """
+    b = Board.empty(np.array([8, 8]))
+    b.add_player(Player(1))
+    p1 = SimplePiece(b)
+    b.add_piece(p1)
+    p2 = SimplePiece(b)
+    b.add_piece(p2, True)
+
+    assert b.query_space(np.asarray([0, 0])) == p2
+
+
+'''RemovePiece Tests'''
+
+
+@pytest.mark.xfail(reason="remove_piece doesnt check if the piece is on the"
+                   " board. This test can be removed if it ends up unneeded")
+def test_remove_piece_different_board():
+    """
+    Ensures proper function when a piece is removed from a board it isn't on
+    """
+    b1 = Board.empty(np.array([8, 8]))
+    b1.add_player(Player(1))
+    p1 = SimplePiece(b1)
+    b1.add_piece(p1)
+
+    b2 = Board.empty(np.array([8, 8]))
+    b2.add_player(Player(1))
+    p2 = SimplePiece(b2)
+    b2.add_piece(p2)
+
+    b1.remove_piece(p2)
+
+    assert b1.query_space(p1.current_coords) == p1
+
+
+def test_remove_piece():
+    """
+    Ensures proper function when a piece is removed from a board
+    """
+    b = Board.empty(np.array([8, 8]))
+    b.add_player(Player(1))
+    p = SimplePiece(b)
+    b.add_piece(p)
+    b.remove_piece(p)
+
+    assert b.query_space(p.current_coords) is None
+
+
+'''AddPlayer Tests'''
+
+
+def test_add_player():
+    """
+    Ensures proper function when a player is added to a board
+    """
+
+    b = Board.empty(np.array([8, 8]))
+    p = Player(1)
+    b.add_player(p)
+
+    expected_players = {1: p}
+
+    assert np.array_equal(b.current_players, expected_players)
+
+
+'''RemovePlayer Tests'''
+
+
+@pytest.mark.xfail(reason="remove player currently adds a player")
+def test_remove_player():
+    """
+    Ensures proper function when a player is removed from a board
+    """
+
+    b = Board.empty(np.array([8, 8]))
+    p1 = Player(1)
+    b.add_player(p1)
+    p2 = Player(2)
+    b.add_player(p2)
+
+    b.remove_player(p2)
+
+    expected_players = {1: p1}
+
+    assert np.array_equal(b.current_players, expected_players)
+
+
+'''GetPlayer Tests'''
+
+
+def test_get_player():
+    """
+    Ensures proper function when a player is added to a board
+    """
+
+    b = Board.empty(np.array([8, 8]))
+    p = Player(1)
+    b.add_player(p)
+
+    expected_player = p
+
+    assert np.array_equal(b.get_player(1), expected_player)
+
+
+'''__eq__ Tests'''
+
+
+def test_board_not_equals():
+    """
+    Ensures proper function checking equality of 2 different boards
+    """
+    base_dimensions = np.array([2, 2])
+    base_board = Board.empty(base_dimensions)
+    player = Player(1)
+    base_board.add_player(player)
+
+    diff_dimension_board = Board.empty(np.array([2, 1]))
+    diff_dimension_board.add_player(player)
+
+    diff_layout_board = Board.empty(base_dimensions)
+    diff_layout_board.add_player(player)
+    p = SimplePiece(diff_layout_board)
+    diff_layout_board.add_piece(p)
+
+    diff_players_board = Board.empty(base_dimensions)
+    diff_players_board.add_player(Player(1))
+
+    assert base_board != diff_dimension_board
+    assert base_board != diff_layout_board
+    assert base_board != diff_players_board
+
+
+def test_board_equals():
+    """
+    Ensures proper function checking equality of 2 equivalent boards
+    """
+    b1 = Board.empty(np.array([8, 8]))
+    b2 = Board.empty(np.array([8, 8]))
+
+    assert b1 == b2
+
+
+'''OnBoard Tests'''
+
+
+@pytest.mark.xfail(reason="Currently on_board throws ValueError")
+def test_not_on_board():
+    '''Ensures proper function when checking if a space out of bounds is on
+    the board'''
+    b = Board.empty(np.array([8, 8]))
+
+    assert not b.on_board(np.asarray([-1, 0]))
+    assert not b.on_board(np.asarray([0, -1]))
+    assert not b.on_board(np.asarray([8, 0]))
+    assert not b.on_board(np.asarray([0, 8]))
+
+
+@pytest.mark.xfail(reason="Currently on_board throws ValueError")
+def test_on_board():
+    '''Ensures proper function when checking if a space in bounds is on
+    the board'''
+    b = Board.empty(np.array([8, 8]))
+
+    assert b.on_board(np.asarray([0, 0]))
+
+
+'''QuerySpace Tests'''
+
+
+def test_query_out_of_bounds_space():
+    '''Ensures proper function when querying an out of bounds space'''
+    b = Board.empty(np.array([8, 8]))
+
+    assert b.query_space(np.asarray([-1, 0])) is None
+    assert b.query_space(np.asarray([0, -1])) is None
+    assert b.query_space(np.asarray([8, 0])) is None
+    assert b.query_space(np.asarray([0, 8])) is None
+
+
+def test_query_space():
+    '''Ensures proper function when querying a space'''
+    b = Board.empty(np.array([8, 8]))
+    b.add_player(Player(1))
+    p = SimplePiece(b)
+    b.add_piece(p)
+
+    assert b.query_space(np.asarray([0, 0])) is p
+    assert b.query_space(np.asarray([1, 0])) is None
+
+
+'''Piece Class Tests'''
 
 
 '''___init___ tests'''
@@ -130,7 +356,7 @@ def test_piece_char():
 
     test_board = Board.empty(np.array([8, 8]))
     test_board.add_player(Player(1))
-    p = SimplePiece(test_board, 's', 1)
+    p = SimplePiece(test_board, expected_piece_char, 1)
 
     assert p.piece_char == expected_piece_char
 
@@ -415,9 +641,11 @@ def test_invalid_player_capture():
     test_board.add_player(Player(expected_player_controller))
     test_board.add_player(Player(2))
     p = SimplePiece(test_board)
+    coordinates = p.current_coords
 
     assert p.capture(3) is False
     assert p.player_controller == expected_player_controller
+    assert test_board.query_space(coordinates) is p
 
 
 @pytest.mark.xfail(reason="Piece should update board prior to setting "
@@ -536,9 +764,9 @@ def test_player_number_immutable():
 
 
 @pytest.mark.xfail(reason="Add piece does not yet check player controller")
-def test_add_piece_not_controlled():
+def test_player_add_piece_not_controlled():
     """
-    Ensures proper functionality when a player adds a piece it doesn't control
+    Ensures proper function when a player adds a piece it doesn't control
     """
     test_board = Board.empty(np.array([8, 8]))
     player2 = Player(2)
@@ -552,9 +780,9 @@ def test_add_piece_not_controlled():
 
 
 @pytest.mark.xfail(reason="Add piece does not return a success boolean")
-def test_add_piece():
+def test_player_add_piece():
     """
-    Ensures proper functionality when a player adds a valid piece
+    Ensures proper function when a player adds a valid piece
     """
     test_board = Board.empty(np.array([8, 8]))
     player = Player(1)
