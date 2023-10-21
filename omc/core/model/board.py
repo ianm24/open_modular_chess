@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import Any
 from typing import cast
 from typing import Collection
-from typing import MutableSet
 
 import numpy as np
 from numpy import ndarray
@@ -22,32 +21,47 @@ class Board:
     """
 
     def __init__(
-            self, dimensions: tuple[int, ...],
+            self, id: int, dimensions: tuple[int, ...],
             layout: ndarray[Piece | None]
     ):
         """
         Initialize an instance of Board.
 
+        :param id: Id for the board
+        :type id: int
         :param dimensions: Dimensions of the board
         :type dimensions: tuple[int, ...]
         :param layout: Layout of pieces on the board
         :type layout: ndarray[Piece | None]
         """
+        self._id: int = id
         self._dimensions: tuple[int, ...] = dimensions
         self._layout: ndarray[Piece | None] = layout
         self._players: dict[int, Player] = dict()
 
     @classmethod
-    def empty(cls, dimensions: tuple[int, ...]) -> Board:
+    def empty(cls, id: int, dimensions: tuple[int, ...]) -> Board:
         """
         Instantiate an empty board.
 
+        :param id: Id for the board
+        :type id: int
         :param dimensions: Dimensions of board
         :type dimensions: tuple[int, ...]
         :return: Empty board instance
         :rtype: Board
         """
-        return Board(dimensions, np.empty(tuple(dimensions), dtype=object))
+        return Board(id, dimensions, np.empty(tuple(dimensions), dtype=object))
+
+    @property
+    def id(self) -> int:
+        """
+        Get ID of the board.
+
+        :return: ID of the board
+        :rtype: int
+        """
+        return self._id
 
     @property
     def dimensions(self) -> tuple[int, ...]:
@@ -161,8 +175,9 @@ class Board:
         """
         if isinstance(other, Board):
             return (
-                self.dimensions == other.dimensions
-                and self.layout == other.layout
+                self.id == other.id
+                and self.dimensions == other.dimensions
+                and np.array_equal(self.layout, other.layout)
                 and self.current_players == other.current_players
             )
         return False
@@ -355,6 +370,16 @@ class Piece:
         return list(self._board.current_players.keys())
 
     @property
+    def board_id(self) -> int:
+        """
+        Gets the id of the board the piece belongs to.
+
+        :return: ID of associated board
+        :rtype: int
+        """
+        return self._board.id
+
+    @property
     def current_coords(self) -> tuple[int, ...]:
         """
         Gets the current coordinates of the piece
@@ -430,7 +455,7 @@ class Piece:
 
         self._board.current_players[self._player_controller].remove_piece(self)
         self._player_controller = new_player
-        self._board.current_players[new_player].remove_piece(self)
+        self._board.current_players[new_player].add_piece(self)
         return True
 
     @classmethod
@@ -503,7 +528,8 @@ class Piece:
         """
         if isinstance(other, Piece):
             return (
-                self.current_coords == other.current_coords
+                self.board_id == other.board_id
+                and self.current_coords == other.current_coords
                 and self.current_players == other.current_players
                 and self.player_controller == other.player_controller
                 and self.piece_pxl_hex == other.piece_pxl_hex
@@ -525,7 +551,7 @@ class Player:
         :param player_number: The board the piece belongs to.
         :ptype player_number: int
         """
-        self._pieces: MutableSet[Piece] = set()
+        self._pieces: list[Piece,] = []
         self._player_number = player_number
 
     @property
@@ -563,7 +589,7 @@ class Player:
         if piece in self._pieces:
             print("The piece to add is already controlled by this player.")
             return False
-        self._pieces.add(piece)
+        self._pieces.append(piece)
         return True
 
     def remove_piece(self, piece: Piece) -> bool:
