@@ -156,7 +156,7 @@ def test_invalid_board():
 @pytest.mark.xfail(reason="Needs to be adapted to new Board structure")
 def test_get_board():
     """Ensures the correct board is gotten for a set"""
-    base_set_board = Board(np.array([8, 8]), np.array([
+    base_set_board = Board(1, (8, 8), np.array([
         ['p2_rook', 'p2_knight', 'p2_bishop', 'p2_king',
          'p2_queen', 'p2_bishop', 'p2_knight', 'p2_rook'],
         ['p2_pawn', 'p2_pawn', 'p2_pawn', 'p2_pawn',
