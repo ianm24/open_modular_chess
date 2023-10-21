@@ -206,7 +206,7 @@ def get_board(set_name: str, piece_map: dict[str, PieceClass]) -> Board:
     }
 
     # inst empty board
-    board = Board.empty(np.array([columns, rows]))
+    board = Board.empty(0, (columns, rows))
 
     # inst players
     players = {pn: Player(pn) for pn in player_numbers}

@@ -156,23 +156,20 @@ def test_invalid_board():
 @pytest.mark.xfail(reason="Needs to be adapted to new Board structure")
 def test_get_board():
     """Ensures the correct board is gotten for a set"""
-    base_set_board = Board(
-        np.array([8, 8]),
-        np.array([
-            ['p2_rook', 'p2_knight', 'p2_bishop', 'p2_king',
-             'p2_queen', 'p2_bishop', 'p2_knight', 'p2_rook'],
-            ['p2_pawn', 'p2_pawn', 'p2_pawn', 'p2_pawn',
-             'p2_pawn', 'p2_pawn', 'p2_pawn', 'p2_pawn'],
-            ['', '', '', '', '', '', '', ''],
-            ['', '', '', '', '', '', '', ''],
-            ['', '', '', '', '', '', '', ''],
-            ['', '', '', '', '', '', '', ''],
-            ['p1_pawn', 'p1_pawn', 'p1_pawn', 'p1_pawn',
-             'p1_pawn', 'p1_pawn', 'p1_pawn', 'p1_pawn'],
-            ['p1_rook', 'p1_knight', 'p1_bishop', 'p1_king', 'p1_queen',
-             'p1_bishop', 'p1_knight', 'p1_rook']]
-        )
-    )
+    base_set_board = Board(np.array([8, 8]), np.array([
+        ['p2_rook', 'p2_knight', 'p2_bishop', 'p2_king',
+         'p2_queen', 'p2_bishop', 'p2_knight', 'p2_rook'],
+        ['p2_pawn', 'p2_pawn', 'p2_pawn', 'p2_pawn',
+         'p2_pawn', 'p2_pawn', 'p2_pawn', 'p2_pawn'],
+        ['', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', ''],
+        ['p1_pawn', 'p1_pawn', 'p1_pawn', 'p1_pawn',
+         'p1_pawn', 'p1_pawn', 'p1_pawn', 'p1_pawn'],
+        ['p1_rook', 'p1_knight', 'p1_bishop', 'p1_king', 'p1_queen',
+         'p1_bishop', 'p1_knight', 'p1_rook']]
+    ), )
     base_piece_map = load_set.get_piece_map("base_set")
     result = load_set.get_board("base_set", base_piece_map)
     assert result == base_set_board

@@ -21,37 +21,39 @@ class Board:
     """
 
     def __init__(
-            self, id: int, dimensions: tuple[int, ...],
-            layout: ndarray[Piece | None]
+            self, board_id: int, dimensions: tuple[int, ...],
+            layout: ndarray[Piece | None, Any]
     ):
         """
         Initialize an instance of Board.
 
-        :param id: Id for the board
-        :type id: int
+        :param board_id: Id for the board
+        :type board_id: int
         :param dimensions: Dimensions of the board
         :type dimensions: tuple[int, ...]
         :param layout: Layout of pieces on the board
         :type layout: ndarray[Piece | None]
         """
-        self._id: int = id
+        self._board_id: int = board_id
         self._dimensions: tuple[int, ...] = dimensions
-        self._layout: ndarray[Piece | None] = layout
+        self._layout: ndarray[Piece | None, Any] = layout
         self._players: dict[int, Player] = dict()
 
     @classmethod
-    def empty(cls, id: int, dimensions: tuple[int, ...]) -> Board:
+    def empty(cls, board_id: int, dimensions: tuple[int, Any]) -> Board:
         """
         Instantiate an empty board.
 
-        :param id: Id for the board
-        :type id: int
+        :param board_id: Id for the board
+        :type board_id: int
         :param dimensions: Dimensions of board
         :type dimensions: tuple[int, ...]
         :return: Empty board instance
         :rtype: Board
         """
-        return Board(id, dimensions, np.empty(tuple(dimensions), dtype=object))
+        return Board(
+            board_id, dimensions, np.empty(tuple(dimensions), dtype=Piece)
+        )
 
     @property
     def id(self) -> int:
@@ -61,7 +63,7 @@ class Board:
         :return: ID of the board
         :rtype: int
         """
-        return self._id
+        return self._board_id
 
     @property
     def dimensions(self) -> tuple[int, ...]:
@@ -74,12 +76,12 @@ class Board:
         return self._dimensions
 
     @property
-    def layout(self) -> ndarray[Player | None]:
+    def layout(self) -> ndarray[Piece | None, Any]:
         """
         Get layout of the board.
 
         :return: Layout of the board
-        :rtype: ndarray[Player | None]
+        :rtype: ndarray[Piece | None]
         """
         return self._layout
 
