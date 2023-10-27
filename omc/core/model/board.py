@@ -4,10 +4,8 @@ from typing import Any
 from typing import Callable
 from typing import cast
 from typing import Collection
-from typing import Optional
 
 import numpy as np
-from colorama import Back
 from colorama import Fore
 from colorama import Style
 from numpy import ndarray
@@ -121,6 +119,7 @@ class Board:
             return False
         index = self.coord_to_index(piece.current_coords)
         self._layout[index] = None
+        piece.remove_from_play()
         return True
 
     @property
@@ -636,6 +635,13 @@ class Piece:
                 and self.piece_char == other.piece_char
             )
         return False
+
+    def remove_from_play(self):
+        """
+        Removes a piece from play by setting coordinates to None.
+        """
+
+        self._current_coords = None
 
 
 ''' TypeVar representing subclasses of "Piece" '''

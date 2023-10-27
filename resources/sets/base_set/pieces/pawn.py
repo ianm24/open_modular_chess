@@ -63,6 +63,10 @@ class Pawn(ChessPiece):
         """
         moves: list[tuple[int, ...]] = []
 
+        if self.current_coords is None:
+            print("This piece is not in play.")
+            return moves
+
         for direction in self.DIRECTIONS:
             # Consider open spaces
             # Check space 1 in front
