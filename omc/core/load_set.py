@@ -9,11 +9,13 @@ from os.path import exists
 from os.path import isdir
 from os.path import isfile
 from os.path import join
-from typing import Callable, cast
+from typing import Callable
+from typing import cast
 
 import numpy as np
 
-from omc.core.exception.exception import BoardNotFoundException, ConditionNotFoundException
+from omc.core.exception.exception import BoardNotFoundException
+from omc.core.exception.exception import ConditionNotFoundException
 from omc.core.exception.exception import EmptyBoardException
 from omc.core.exception.exception import InvalidBoardDimensionException
 from omc.core.exception.exception import InvalidBoardFormatException
@@ -21,8 +23,9 @@ from omc.core.exception.exception import InvalidBoardLayoutException
 from omc.core.exception.exception import PiecesEmptyException
 from omc.core.exception.exception import PiecesNotFoundException
 from omc.core.exception.exception import SetNotFoundException
-from omc.core.model.board import Board, PieceClass
+from omc.core.model.board import Board
 from omc.core.model.board import Piece
+from omc.core.model.board import PieceClass
 from omc.core.model.board import Player
 from omc.core.model.condition import Condition
 

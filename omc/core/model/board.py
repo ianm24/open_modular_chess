@@ -1,11 +1,15 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Optional
+from typing import Any
+from typing import Callable
 from typing import cast
 from typing import Collection
+from typing import Optional
 
 import numpy as np
-from colorama import Style, Back, Fore
+from colorama import Back
+from colorama import Fore
+from colorama import Style
 from numpy import ndarray
 
 from omc.core.exception.exception import NegativePieceCoordinatesException
@@ -171,10 +175,10 @@ class Board:
             self,
             *,
             include_key: bool = False,
-            select_player: Optional[Player] = None,
-            select_piece: Optional[Piece] = None,
-            primary_color: Optional[str] = None,
-            secondary_color: Optional[str] = None
+            select_player: Player | None = None,
+            select_piece: Piece | None = None,
+            primary_color: str | None = None,
+            secondary_color: str | None = None
     ) -> str:
         """
         Print the board to the command line.
@@ -231,10 +235,10 @@ class Board:
         """
         if isinstance(other, Board):
             return (
-                    self.id == other.id
-                    and self.dimensions == other.dimensions
-                    and np.array_equal(self.layout, other.layout)
-                    and self.current_players == other.current_players
+                self.id == other.id
+                and self.dimensions == other.dimensions
+                and np.array_equal(self.layout, other.layout)
+                and self.current_players == other.current_players
             )
         return False
 
@@ -584,12 +588,12 @@ class Piece:
         """
         if isinstance(other, Piece):
             return (
-                    self.board_id == other.board_id
-                    and self.current_coords == other.current_coords
-                    and self.current_players == other.current_players
-                    and self.player_controller == other.player_controller
-                    and self.piece_pxl_hex == other.piece_pxl_hex
-                    and self.piece_char == other.piece_char
+                self.board_id == other.board_id
+                and self.current_coords == other.current_coords
+                and self.current_players == other.current_players
+                and self.player_controller == other.player_controller
+                and self.piece_pxl_hex == other.piece_pxl_hex
+                and self.piece_char == other.piece_char
             )
         return False
 
@@ -678,7 +682,7 @@ class Player:
         """
         if isinstance(other, Player):
             return (
-                    self.player_number == other.player_number
-                    and self.pieces == other.pieces
+                self.player_number == other.player_number
+                and self.pieces == other.pieces
             )
         return False

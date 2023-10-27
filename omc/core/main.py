@@ -1,12 +1,16 @@
-import omc.core.load_set as load_set
-
-import time
 import os
 import platform
+import time
 
-from omc.core.model.board import Piece, Player, Board
+from colorama import Back
+from colorama import Fore
+from colorama import Style
 
-from colorama import Fore, Back, Style
+import omc.core.load_set as load_set
+from omc.core.model.board import Board
+from omc.core.model.board import Piece
+from omc.core.model.board import Player
+
 
 class Game:
     def __init__(self):

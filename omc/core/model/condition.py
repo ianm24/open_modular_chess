@@ -1,4 +1,5 @@
-from omc.core.model.board import Board, Player
+from omc.core.model.board import Board
+from omc.core.model.board import Player
 
 
 class Condition:
