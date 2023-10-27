@@ -7,6 +7,7 @@ from typing import Collection
 from typing import Optional
 
 import numpy as np
+from colorama import Back
 from colorama import Fore
 from colorama import Style
 from numpy import ndarray
