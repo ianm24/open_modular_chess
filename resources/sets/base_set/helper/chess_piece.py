@@ -25,7 +25,10 @@ class ChessPiece(Piece):
 
         # Consider all valid directions
         for direction in self.DIRECTIONS:
-            try_move = self._current_coords + direction
+            try_move = (
+                self._current_coords[0] + direction[0],
+                self._current_coords[1] + direction[1]
+            )
             while self._board.on_board(try_move):
                 try_query = self._board.query_space(try_move)
                 # Consider open spaces

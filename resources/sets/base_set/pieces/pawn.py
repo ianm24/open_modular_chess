@@ -51,7 +51,7 @@ class Pawn(ChessPiece):
         :return: Whether the pawn is moving in the negative y direction
         :rtype: bool
         """
-        return self._player_controller % 2 == 0
+        return self._player_controller % 2 == 1
 
     def list_moves(self) -> list[tuple[int, ...]]:
         """
@@ -61,7 +61,7 @@ class Pawn(ChessPiece):
             the piece.
         :rtype: list[tuple[int, ...]]
         """
-        moves = []
+        moves: list[tuple[int, ...]] = []
 
         for direction in self.DIRECTIONS:
             # Consider open spaces

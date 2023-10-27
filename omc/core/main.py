@@ -1,12 +1,17 @@
-import omc.core.load_set as load_set
-
-import time
 import os
 import platform
+import time
+from typing import cast
 
-from omc.core.model.board import Piece, Player, Board
+from colorama import Back
+from colorama import Fore
+from colorama import Style
 
-from colorama import Fore, Back, Style
+import omc.core.load_set as load_set
+from omc.core.model.board import Board
+from omc.core.model.board import Piece
+from omc.core.model.board import Player
+
 
 class Game:
     def __init__(self):
@@ -30,15 +35,20 @@ class Game:
     @staticmethod
     def _show_board_for_player(board: Board, player: Player) -> None:
         print(
-            board.get_board_chars(include_key=True, select_player=player,
-                                  primary_color=Back.GREEN + Fore.BLACK + Style.BRIGHT)
+            board.get_board_chars(
+                select_player=player,
+                primary_color=Back.GREEN + Fore.BLACK + Style.BRIGHT
+            )
         )
 
     @staticmethod
     def _show_board_for_piece(board: Board, piece: Piece) -> None:
         print(
-            board.get_board_chars(include_key=True, select_piece=piece,
-                                  primary_color=Back.GREEN + Fore.BLACK + Style.BRIGHT)
+            board.get_board_chars(
+                select_piece=piece,
+                primary_color=Back.GREEN + Fore.BLACK + Style.BRIGHT,
+                secondary_color=Back.BLUE + Fore.BLACK + Style.BRIGHT,
+            )
         )
 
     @staticmethod
@@ -57,7 +67,7 @@ class Game:
                 print('\n')
                 continue
             try:
-                coords = tuple(int(x) for x in piece_select_args)
+                coords = tuple(int(arg) for arg in piece_select_args)
             except ValueError:
                 print(
                     'Invalid piece. What piece will you select? ("l" for list)'
@@ -87,7 +97,7 @@ class Game:
             except ValueError:
                 print('Invalid move. What move will you make? ("l" for list)')
                 continue
-        return coords
+        return cast(tuple[int, ...], coords)
 
     def play_game(self):
         os.system('cls' if platform.system() == 'Windows' else 'clear')
@@ -99,14 +109,14 @@ class Game:
                 selected_piece = self._ask_for_piece(player)
                 self._show_board_for_piece(board, selected_piece)
                 selected_piece.move(self._ask_for_move(board, selected_piece))
-                if lose_con.test_condition(board, player):
-                    print(f'Player {player_num} loses!')
-                    game_over = True
-                    break
-                if win_con.test_condition(board, player):
-                    print(f'Player {player_num} wins!')
-                    game_over = True
-                    break
+                # if lose_con.test_condition(board, player):
+                #     print(f'Player {player_num} loses!')
+                #     game_over = True
+                #     break
+                # if win_con.test_condition(board, player):
+                #     print(f'Player {player_num} wins!')
+                #     game_over = True
+                #     break
         self.main_menu()
 
     def settings(self):

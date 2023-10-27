@@ -1,11 +1,14 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Optional
+from typing import Any
+from typing import Callable
 from typing import cast
 from typing import Collection
+from typing import Optional
 
 import numpy as np
-from colorama import Style, Back, Fore
+from colorama import Fore
+from colorama import Style
 from numpy import ndarray
 
 from omc.core.exception.exception import NegativePieceCoordinatesException
@@ -20,6 +23,7 @@ class Board:
     Object representing the state of the board, its present layout, and
      dimensions.
     """
+    PLAYER_COLORS = [Fore.BLUE, Fore.RED, Fore.GREEN, Fore.YELLOW]
 
     def __init__(
             self, board_id: int, dimensions: tuple[int, ...],
@@ -98,7 +102,8 @@ class Board:
         if self.query_space(piece.current_coords) is not None:
             print("There is already a piece at this location on the board.")
             return False
-        self._layout[tuple(piece.current_coords)] = piece
+        index = self.coord_to_index(piece.current_coords)
+        self._layout[index] = piece
         return True
 
     def remove_piece(self, piece: Piece) -> bool:
@@ -113,7 +118,8 @@ class Board:
         if self.query_space(piece.current_coords) != piece:
             print("The piece to remove does not belong to this board.")
             return False
-        self._layout[tuple(piece.current_coords)] = None
+        index = self.coord_to_index(piece.current_coords)
+        self._layout[index] = None
         return True
 
     @property
@@ -167,20 +173,33 @@ class Board:
         """
         return self._players[player_number]
 
+    @staticmethod
+    def _highlight_piece(
+            piece: Piece | None,
+            select_player: Player | None,
+            select_piece: Piece | None
+    ) -> bool:
+        if select_piece is None or piece is None:
+            return False
+        if select_piece == piece:
+            return True
+        return (
+            select_player is not None
+            and piece.player_controller == select_player.player_number
+        )
+
     def get_board_chars(
             self,
             *,
-            include_key: bool = False,
-            select_player: Optional[Player] = None,
-            select_piece: Optional[Piece] = None,
-            primary_color: Optional[str] = None,
-            secondary_color: Optional[str] = None
+            select_player: Player | None = None,
+            select_piece: Piece | None = None,
+            primary_color: str | None = None,
+            secondary_color: str | None = None
     ) -> str:
         """
         Print the board to the command line.
 
         :param select_piece: TODO
-        :param include_key: TODO
         :param select_player: TODO
         :param primary_color: TODO
         :param secondary_color: TODO
@@ -190,10 +209,11 @@ class Board:
         assert len(self._dimensions) == 2
         board_str = ''
         board_str += '+--------+\n'
-        for y, row in enumerate(self._layout):
+        for yi, row in enumerate(reversed(self._layout)):
+            y = self._dimensions[1] - yi - 1
             board_str += '|'
             for x, piece in enumerate(row):
-                highlight_move = (
+                highlight_move = secondary_color is not None and (
                     select_piece is not None
                     and (x, y) in select_piece.list_moves()
                 )
@@ -204,17 +224,15 @@ class Board:
                     if highlight_move:
                         board_str += Style.RESET_ALL
                 else:
-                    highlight_player = (
-                        select_player is not None and piece is not None
-                        and (
-                            piece.player_controller == select_player.player_number
-                            or piece == select_piece
+                    highlight_piece = primary_color is not None and (
+                        self._highlight_piece(
+                            piece, select_player, select_piece
                         )
                     )
-                    if highlight_player:
+                    if highlight_piece:
                         board_str += primary_color
                     board_str += piece.piece_char
-                    if highlight_player:
+                    if highlight_piece:
                         board_str += Style.RESET_ALL
             board_str += '|\n'
         board_str += '+--------+\n'
@@ -231,10 +249,10 @@ class Board:
         """
         if isinstance(other, Board):
             return (
-                    self.id == other.id
-                    and self.dimensions == other.dimensions
-                    and np.array_equal(self.layout, other.layout)
-                    and self.current_players == other.current_players
+                self.id == other.id
+                and self.dimensions == other.dimensions
+                and np.array_equal(self.layout, other.layout)
+                and self.current_players == other.current_players
             )
         return False
 
@@ -254,6 +272,30 @@ class Board:
             ]
         )
 
+    @staticmethod
+    def coord_to_index(coord: tuple[int, ...]) -> tuple[int, ...]:
+        """
+        Converts an n-dimensional space to an n-dimensional index.
+
+        :param coord: coord to convert
+        :type coord: tuple[int, ...]
+        :return: index corresponding to the space
+        :rtype: tuple[int, ...]
+        """
+        return tuple(reversed(coord))
+
+    @staticmethod
+    def index_to_coord(index: tuple[int, ...]) -> tuple[int, ...]:
+        """
+        Converts an n-dimensional index to an n-dimensional space.
+
+        :param index: index to convert
+        :type index: tuple[int, ...]
+        :return: coord corresponding to the index
+        :rtype: tuple[int, ...]
+        """
+        return tuple(reversed(index))
+
     def query_space(self, space: tuple[int, ...]) -> Piece | None:
         """
         Query a space for what piece exists there, if any, or None otherwise.
@@ -264,7 +306,8 @@ class Board:
         :rtype: Piece | None
         """
         try:
-            return cast(Piece | None, self._layout[space])
+            index = self.coord_to_index(space)
+            return cast(Piece | None, self._layout[index])
         except IndexError:
             return None  # Handle out-of-bounds coordinates
 
@@ -584,12 +627,12 @@ class Piece:
         """
         if isinstance(other, Piece):
             return (
-                    self.board_id == other.board_id
-                    and self.current_coords == other.current_coords
-                    and self.current_players == other.current_players
-                    and self.player_controller == other.player_controller
-                    and self.piece_pxl_hex == other.piece_pxl_hex
-                    and self.piece_char == other.piece_char
+                self.board_id == other.board_id
+                and self.current_coords == other.current_coords
+                and self.current_players == other.current_players
+                and self.player_controller == other.player_controller
+                and self.piece_pxl_hex == other.piece_pxl_hex
+                and self.piece_char == other.piece_char
             )
         return False
 
@@ -678,7 +721,7 @@ class Player:
         """
         if isinstance(other, Player):
             return (
-                    self.player_number == other.player_number
-                    and self.pieces == other.pieces
+                self.player_number == other.player_number
+                and self.pieces == other.pieces
             )
         return False
