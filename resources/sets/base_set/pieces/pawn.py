@@ -51,7 +51,7 @@ class Pawn(ChessPiece):
         :return: Whether the pawn is moving in the negative y direction
         :rtype: bool
         """
-        return self._player_controller % 2 == 1
+        return self._player_controller % 2 == 0
 
     def list_moves(self) -> list[tuple[int, ...]]:
         """
@@ -66,12 +66,18 @@ class Pawn(ChessPiece):
         for direction in self.DIRECTIONS:
             # Consider open spaces
             # Check space 1 in front
-            move_f = tuple(self._current_coords + direction)
+            move_f = (
+                self._current_coords[0] + direction[0],
+                self._current_coords[1] + direction[1]
+            )
             if self._board.query_space(move_f) is None:
                 moves.append(move_f)
 
             # Check space 2 in front (if in starting spot)
-            move_ff = tuple(self._current_coords + (2 * direction))
+            move_ff = (
+                self._current_coords[0] + 2 * direction[0],
+                self._current_coords[1] + 2 * direction[1]
+            )
             if (
                     self._current_coords == self._starting_coords
                     and self._board.query_space(move_ff) is None
@@ -79,7 +85,10 @@ class Pawn(ChessPiece):
                 moves.append(move_ff)
 
             # Consider captures
-            move_fl = tuple(self._current_coords + direction + (1, 0))
+            move_fl = (
+                self._current_coords[0] + direction[0] + 1,
+                self._current_coords[1] + direction[1]
+            )
             player_fl = self._board.query_space(move_fl)
             if (
                     player_fl is not None
@@ -87,7 +96,10 @@ class Pawn(ChessPiece):
             ):
                 moves.append(move_fl)
 
-            move_fr = tuple(self._current_coords + direction + (-1, 0))
+            move_fr = (
+                self._current_coords[0] + direction[0] - 1,
+                self._current_coords[1] + direction[1]
+            )
             player_fr = self._board.query_space(move_fr)
             if (
                     player_fr is not None

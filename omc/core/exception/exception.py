@@ -10,6 +10,10 @@ class PiecesNotFoundException(AbstractOpenModularChessException):
     """Specified set not found in the sets directory"""
 
 
+class ConditionNotFoundException(AbstractOpenModularChessException):
+    """Specified condition not found in the sets directory"""
+
+
 class PiecesEmptyException(AbstractOpenModularChessException):
     """Specified set not found in the sets directory"""
 

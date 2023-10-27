@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Callable, Optional
 from typing import cast
 from typing import Collection
 
 import numpy as np
+from colorama import Style, Back, Fore
 from numpy import ndarray
 
 from omc.core.exception.exception import NegativePieceCoordinatesException
@@ -166,6 +167,59 @@ class Board:
         """
         return self._players[player_number]
 
+    def get_board_chars(
+            self,
+            *,
+            include_key: bool = False,
+            select_player: Optional[Player] = None,
+            select_piece: Optional[Piece] = None,
+            primary_color: Optional[str] = None,
+            secondary_color: Optional[str] = None
+    ) -> str:
+        """
+        Print the board to the command line.
+
+        :param select_piece: TODO
+        :param include_key: TODO
+        :param select_player: TODO
+        :param primary_color: TODO
+        :param secondary_color: TODO
+        :return: String representation of the board
+        :rtype: str
+        """
+        assert len(self._dimensions) == 2
+        board_str = ''
+        board_str += '+--------+\n'
+        for y, row in enumerate(self._layout):
+            board_str += '|'
+            for x, piece in enumerate(row):
+                highlight_move = (
+                    select_piece is not None
+                    and (x, y) in select_piece.list_moves()
+                )
+                if highlight_move:
+                    board_str += secondary_color
+                if piece is None:
+                    board_str += ' '
+                    if highlight_move:
+                        board_str += Style.RESET_ALL
+                else:
+                    highlight_player = (
+                        select_player is not None and piece is not None
+                        and (
+                            piece.player_controller == select_player.player_number
+                            or piece == select_piece
+                        )
+                    )
+                    if highlight_player:
+                        board_str += primary_color
+                    board_str += piece.piece_char
+                    if highlight_player:
+                        board_str += Style.RESET_ALL
+            board_str += '|\n'
+        board_str += '+--------+\n'
+        return board_str
+
     def __eq__(self, other: Any):
         """
         Compare this instance to another instance for equality.
@@ -177,10 +231,10 @@ class Board:
         """
         if isinstance(other, Board):
             return (
-                self.id == other.id
-                and self.dimensions == other.dimensions
-                and np.array_equal(self.layout, other.layout)
-                and self.current_players == other.current_players
+                    self.id == other.id
+                    and self.dimensions == other.dimensions
+                    and np.array_equal(self.layout, other.layout)
+                    and self.current_players == other.current_players
             )
         return False
 
@@ -530,14 +584,18 @@ class Piece:
         """
         if isinstance(other, Piece):
             return (
-                self.board_id == other.board_id
-                and self.current_coords == other.current_coords
-                and self.current_players == other.current_players
-                and self.player_controller == other.player_controller
-                and self.piece_pxl_hex == other.piece_pxl_hex
-                and self.piece_char == other.piece_char
+                    self.board_id == other.board_id
+                    and self.current_coords == other.current_coords
+                    and self.current_players == other.current_players
+                    and self.player_controller == other.player_controller
+                    and self.piece_pxl_hex == other.piece_pxl_hex
+                    and self.piece_char == other.piece_char
             )
         return False
+
+
+''' TypeVar representing subclasses of "Piece" '''
+PieceClass = Callable[..., Piece]
 
 
 class Player:
@@ -553,7 +611,7 @@ class Player:
         :param player_number: The board the piece belongs to.
         :ptype player_number: int
         """
-        self._pieces: list[Piece,] = []
+        self._pieces: list[Piece] = []
         self._player_number = player_number
 
     @property
@@ -620,7 +678,7 @@ class Player:
         """
         if isinstance(other, Player):
             return (
-                self.player_number == other.player_number
-                and self.pieces == other.pieces
+                    self.player_number == other.player_number
+                    and self.pieces == other.pieces
             )
         return False
