@@ -47,7 +47,7 @@ def test_list_second_moves_pawn():
 
 def test_list_blocked_moves_pawn():
     """
-    Ensures proper moves available for a blocked pawn 
+    Ensures proper moves available for a blocked pawn
     """
 
     base_piece_map = load_set.get_piece_map('base_set')
