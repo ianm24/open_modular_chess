@@ -9,7 +9,6 @@ from os.path import exists
 from os.path import isdir
 from os.path import isfile
 from os.path import join
-from typing import Callable
 from typing import cast
 
 import numpy as np
