@@ -252,17 +252,13 @@ class Board:
             self,
             *,
             select_player: Player | None = None,
-            select_piece: Piece | None = None,
-            primary_color: str | None = None,
-            secondary_color: str | None = None
+            select_piece: Piece | None = None
     ) -> str:
         """
         Print the board to the command line.
 
         :param select_piece: TODO
         :param select_player: TODO
-        :param primary_color: TODO
-        :param secondary_color: TODO
         :return: String representation of the board
         :rtype: str
         """
@@ -276,31 +272,32 @@ class Board:
             y = self._dimensions[1] - yi - 1
             board_str += '|'
             for x, piece in enumerate(row):
-                highlight_move = secondary_color is not None and (
-                    (x, y) in selected_piece_moves
-                )
+                highlight_move = (x, y) in selected_piece_moves
                 if highlight_move:
                     query = self.query_space((x, y))
                     if query is not None and self._highlight_capture(
                         query, select_player, select_piece
                     ):
-                        board_str += cast(str, Back.RED)
+                        color = Back.RED + Fore.BLACK + Style.BRIGHT
+                        board_str += color
                     else:
-                        board_str += cast(str, secondary_color)
+                        color = Back.BLUE + Fore.BLACK + Style.BRIGHT
+                        board_str += color
                 if piece is None:
                     board_str += ' '
                     if highlight_move:
                         board_str += Style.RESET_ALL
                 else:
-                    highlight_piece = primary_color is not None and (
-                        self._highlight_owned_piece(
-                            piece, select_player, select_piece)
+                    highlight_piece = self._highlight_owned_piece(
+                        piece, select_player, select_piece
                     )
                     if highlight_piece:
                         if len(piece.list_moves()) == 0:
-                            board_str += cast(str, Back.YELLOW)
+                            color = Back.YELLOW + Fore.BLACK + Style.BRIGHT
+                            board_str += color
                         else:
-                            board_str += cast(str, primary_color)
+                            color = Back.GREEN + Fore.BLACK + Style.BRIGHT
+                            board_str += color
                     board_str += piece.piece_char
                     if highlight_piece or highlight_move:
                         board_str += Style.RESET_ALL

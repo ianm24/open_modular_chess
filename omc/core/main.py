@@ -3,10 +3,6 @@ import platform
 import time
 from typing import cast
 
-from colorama import Back
-from colorama import Fore
-from colorama import Style
-
 import omc.core.load_set as load_set
 from omc.core.model.board import Board
 from omc.core.model.board import Piece
@@ -34,32 +30,26 @@ class Game:
 
     @staticmethod
     def _show_board_for_player(board: Board, player: Player) -> None:
-        print(
-            board.get_board_chars(
-                select_player=player,
-                primary_color=Back.GREEN + Fore.BLACK + Style.BRIGHT
-            )
-        )
+        print(board.get_board_chars(select_player=player))
 
     @staticmethod
     def _show_board_for_piece(board: Board, piece: Piece) -> None:
-        print(
-            board.get_board_chars(
-                select_piece=piece,
-                primary_color=Back.GREEN + Fore.BLACK + Style.BRIGHT,
-                secondary_color=Back.BLUE + Fore.BLACK + Style.BRIGHT,
-            )
-        )
+        print(board.get_board_chars(select_piece=piece))
 
     @staticmethod
     def _ask_for_piece(player: Player) -> Piece:
-        coord_map = {piece.current_coords: piece for piece in player.pieces}
+        coord_map = {
+            piece.current_coords: piece for piece in player.pieces
+            if len(piece.list_moves()) > 0
+        }
         coords = None
         while coords not in coord_map:
             print('What piece will you select? ("l" for list)')
             piece_select_args = input().split()
             if len(piece_select_args) == 1 and piece_select_args[0] == 'l':
                 for piece in player.pieces:
+                    if len(piece.list_moves()) == 0:
+                        break
                     print(
                         f'{piece.current_coords[0]} {piece.current_coords[1]}.'
                         f' {piece.piece_char}'
