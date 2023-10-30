@@ -23,7 +23,10 @@ class Board:
     Object representing the state of the board, its present layout, and
      dimensions.
     """
-    PLAYER_COLORS = [Fore.BLUE, Fore.RED, Fore.GREEN, Fore.YELLOW]
+    CAPTURE_COLOR = Back.RED + Fore.BLACK + Style.BRIGHT
+    MOVE_COLOR = Back.BLUE + Fore.BLACK + Style.BRIGHT
+    MOBILE_COLOR = Back.GREEN + Fore.BLACK + Style.BRIGHT
+    IMMOBILE_COLOR = Back.YELLOW + Fore.BLACK + Style.BRIGHT
 
     def __init__(
             self, board_id: int, dimensions: tuple[int, ...],
@@ -278,11 +281,9 @@ class Board:
                     if query is not None and self._highlight_capture(
                         query, select_player, select_piece
                     ):
-                        color = Back.RED + Fore.BLACK + Style.BRIGHT
-                        board_str += color
+                        board_str += self.CAPTURE_COLOR
                     else:
-                        color = Back.BLUE + Fore.BLACK + Style.BRIGHT
-                        board_str += color
+                        board_str += self.MOVE_COLOR
                 if piece is None:
                     board_str += ' '
                     if highlight_move:
@@ -293,11 +294,9 @@ class Board:
                     )
                     if highlight_piece:
                         if len(piece.list_moves()) == 0:
-                            color = Back.YELLOW + Fore.BLACK + Style.BRIGHT
-                            board_str += color
+                            board_str += self.IMMOBILE_COLOR
                         else:
-                            color = Back.GREEN + Fore.BLACK + Style.BRIGHT
-                            board_str += color
+                            board_str += self.MOBILE_COLOR
                     board_str += piece.piece_char
                     if highlight_piece or highlight_move:
                         board_str += Style.RESET_ALL
