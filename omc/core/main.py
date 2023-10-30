@@ -73,7 +73,7 @@ class Game:
                     'Invalid piece. What piece will you select? ("l" for list)'
                 )
                 continue
-        return coord_map[coords]
+        return coord_map[cast(tuple[int, ...], coords)]
 
     @staticmethod
     def _ask_for_move(board: Board, piece: Piece) -> tuple[int, ...]:

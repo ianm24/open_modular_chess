@@ -6,6 +6,7 @@ from typing import cast
 from typing import Collection
 
 import numpy as np
+from colorama import Back
 from colorama import Fore
 from colorama import Style
 from numpy import ndarray
@@ -196,11 +197,44 @@ class Board:
         return self._players[player_number]
 
     @staticmethod
-    def _highlight_piece(
+    def _highlight_capture(
             piece: Piece | None,
             select_player: Player | None,
             select_piece: Piece | None
     ) -> bool:
+        """
+        Determine whether a piece should be highlighted as capturable.
+        :param piece: The piece in question
+        :param select_player: The selected player (if one is selected)
+        :param select_piece: The selected piece (if one is selected)
+        :return:
+        """
+        if piece is None:
+            return False
+
+        if select_piece is not None:
+            if select_piece.player_controller != piece.player_controller:
+                return True
+
+        if select_player is not None:
+            if piece.player_controller != select_player.player_number:
+                return True
+
+        return False
+
+    @staticmethod
+    def _highlight_owned_piece(
+            piece: Piece | None,
+            select_player: Player | None,
+            select_piece: Piece | None
+    ) -> bool:
+        """
+        Determine whether a piece should be highlighted as owned.
+        :param piece: The piece in question
+        :param select_player: The selected player (if one is selected)
+        :param select_piece: The selected piece (if one is selected)
+        :return:
+        """
         if piece is None:
             return False
 
@@ -246,21 +280,29 @@ class Board:
                     (x, y) in selected_piece_moves
                 )
                 if highlight_move:
-                    board_str += cast(str, secondary_color)
+                    query = self.query_space((x, y))
+                    if query is not None and self._highlight_capture(
+                        query, select_player, select_piece
+                    ):
+                        board_str += cast(str, Back.RED)
+                    else:
+                        board_str += cast(str, secondary_color)
                 if piece is None:
                     board_str += ' '
                     if highlight_move:
                         board_str += Style.RESET_ALL
                 else:
                     highlight_piece = primary_color is not None and (
-                        self._highlight_piece(
-                            piece, select_player, select_piece
-                        )
+                        self._highlight_owned_piece(
+                            piece, select_player, select_piece)
                     )
                     if highlight_piece:
-                        board_str += cast(str, primary_color)
+                        if len(piece.list_moves()) == 0:
+                            board_str += cast(str, Back.YELLOW)
+                        else:
+                            board_str += cast(str, primary_color)
                     board_str += piece.piece_char
-                    if highlight_piece:
+                    if highlight_piece or highlight_move:
                         board_str += Style.RESET_ALL
             board_str += '|\n'
         board_str += '+--------+\n'
