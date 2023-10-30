@@ -4,10 +4,8 @@ from typing import Any
 from typing import Callable
 from typing import cast
 from typing import Collection
-from typing import Optional
 
 import numpy as np
-from colorama import Back
 from colorama import Fore
 from colorama import Style
 from numpy import ndarray
@@ -41,6 +39,8 @@ class Board:
         :type layout: ndarray[Piece | None]
         """
         self._board_id: int = board_id
+        self._board_state_hash_dirty: bool = True
+        self._board_state_hash: int = 0
         self._dimensions: tuple[int, ...] = dimensions
         self._layout: ndarray[Piece | None, Any] = layout
         self._players: dict[int, Player] = dict()
@@ -91,6 +91,32 @@ class Board:
         """
         return self._layout
 
+    @property
+    def current_players(self) -> dict[int, Player]:
+        """
+        Get current players on the board.
+
+        :return: Current players on the board
+        :rtype: tuple[int, ...]
+        """
+        return self._players
+
+    @property
+    def board_state_hash(self) -> int:
+        """
+        Get the hash of the board state.
+
+        :return: Hash of the board state
+        :rtype: int
+        """
+        if self._board_state_hash_dirty:
+            self._board_state_hash = 0
+            for index, piece in np.ndenumerate(self._layout):
+                piece_hash = piece.piece_state_hash if piece else None
+                self._board_state_hash += hash((index, piece_hash))
+            self._board_state_hash_dirty = False
+        return self._board_state_hash
+
     def add_piece(self, piece: Piece) -> bool:
         """
         Add a piece to the board.
@@ -105,6 +131,7 @@ class Board:
             return False
         index = self.coord_to_index(piece.current_coords)
         self._layout[index] = piece
+        self._board_state_hash_dirty = True
         return True
 
     def remove_piece(self, piece: Piece) -> bool:
@@ -121,17 +148,8 @@ class Board:
             return False
         index = self.coord_to_index(piece.current_coords)
         self._layout[index] = None
+        self._board_state_hash_dirty = True
         return True
-
-    @property
-    def current_players(self) -> dict[int, Player]:
-        """
-        Get current players on the board.
-
-        :return: Current players on the board
-        :rtype: tuple[int, ...]
-        """
-        return self._players
 
     def add_player(self, player: Player) -> bool:
         """
@@ -146,6 +164,7 @@ class Board:
             print("The player to add is already on the board.")
             return False
         self._players[player.player_number] = player
+        self._board_state_hash_dirty = True
         return True
 
     def remove_player(self, player: Player) -> bool:
@@ -161,6 +180,7 @@ class Board:
             print("The player to remove isn't on the board.")
             return False
         del self._players[player.player_number]
+        self._board_state_hash_dirty = True
         return True
 
     def get_player(self, player_number: int) -> Player:
@@ -180,14 +200,18 @@ class Board:
             select_player: Player | None,
             select_piece: Piece | None
     ) -> bool:
-        if select_piece is None or piece is None:
+        if piece is None:
             return False
-        if select_piece == piece:
-            return True
-        return (
-            select_player is not None
-            and piece.player_controller == select_player.player_number
-        )
+
+        if select_piece is not None:
+            if select_piece == piece:
+                return True
+
+        if select_player is not None:
+            if piece.player_controller == select_player.player_number:
+                return True
+
+        return False
 
     def get_board_chars(
             self,
@@ -210,16 +234,18 @@ class Board:
         assert len(self._dimensions) == 2
         board_str = ''
         board_str += '+--------+\n'
+        selected_piece_moves = (
+            select_piece.list_moves() if select_piece else []
+        )
         for yi, row in enumerate(reversed(self._layout)):
             y = self._dimensions[1] - yi - 1
             board_str += '|'
             for x, piece in enumerate(row):
                 highlight_move = secondary_color is not None and (
-                    select_piece is not None
-                    and (x, y) in select_piece.list_moves()
+                    (x, y) in selected_piece_moves
                 )
                 if highlight_move:
-                    board_str += secondary_color
+                    board_str += cast(str, secondary_color)
                 if piece is None:
                     board_str += ' '
                     if highlight_move:
@@ -231,7 +257,7 @@ class Board:
                         )
                     )
                     if highlight_piece:
-                        board_str += primary_color
+                        board_str += cast(str, primary_color)
                     board_str += piece.piece_char
                     if highlight_piece:
                         board_str += Style.RESET_ALL
@@ -435,6 +461,10 @@ class Piece:
 
         self._player_controller = player_controller
 
+        # For caching moves between board state changes
+        self._cached_moves: list[tuple[int, ...]] = []
+        self._last_board_state_hash: int = 0
+
     @property
     def piece_char(self) -> str:
         """
@@ -499,6 +529,16 @@ class Piece:
         """
         return self._player_controller
 
+    @property
+    def piece_state_hash(self) -> int:
+        """
+        Gets a hash of the current state of the piece.
+
+        :return: Hash of the current state of the piece
+        :rtype: int
+        """
+        return hash(self._current_coords) + hash(self._player_controller)
+
     def list_moves(self) -> list[tuple[int, ...]]:
         """
         Gives a list of all available moves for the piece.
@@ -507,7 +547,8 @@ class Piece:
             the piece.
         :rtype: list[tuple[int, ...]]
         """
-
+        if self._board.board_state_hash == self._last_board_state_hash:
+            return self._cached_moves
         raise NotImplementedError
 
     def move(self, coords: tuple[int, ...]) -> bool:

@@ -42,7 +42,7 @@ class Pawn(ChessPiece):
         super().__init__(
             board, piece_char, piece_pxl_hex, current_coords, player_controller
         )
-        self.DIRECTIONS = ((0, 1),) if self._moving_down() else ((0, -1),)
+        self.DIRECTIONS = ((0, -1),) if self._moving_down() else ((0, 1),)
 
     def _moving_down(self) -> bool:
         """
@@ -51,7 +51,7 @@ class Pawn(ChessPiece):
         :return: Whether the pawn is moving in the negative y direction
         :rtype: bool
         """
-        return self._player_controller % 2 == 1
+        return self._player_controller % 2 == 0
 
     def list_moves(self) -> list[tuple[int, ...]]:
         """
@@ -61,7 +61,12 @@ class Pawn(ChessPiece):
             the piece.
         :rtype: list[tuple[int, ...]]
         """
-        moves: list[tuple[int, ...]] = []
+        if self._board.board_state_hash == self._last_board_state_hash:
+            return self._cached_moves
+
+        self._last_board_state_hash = self._board.board_state_hash
+
+        self._cached_moves = []
 
         for direction in self.DIRECTIONS:
             # Consider open spaces
@@ -71,7 +76,7 @@ class Pawn(ChessPiece):
                 self._current_coords[1] + direction[1]
             )
             if self._board.query_space(move_f) is None:
-                moves.append(move_f)
+                self._cached_moves.append(move_f)
 
             # Check space 2 in front (if in starting spot)
             move_ff = (
@@ -82,7 +87,7 @@ class Pawn(ChessPiece):
                     self._current_coords == self._starting_coords
                     and self._board.query_space(move_ff) is None
             ):
-                moves.append(move_ff)
+                self._cached_moves.append(move_ff)
 
             # Consider captures
             move_fl = (
@@ -94,7 +99,7 @@ class Pawn(ChessPiece):
                     player_fl is not None
                     and player_fl.player_controller != self._player_controller
             ):
-                moves.append(move_fl)
+                self._cached_moves.append(move_fl)
 
             move_fr = (
                 self._current_coords[0] + direction[0] - 1,
@@ -105,9 +110,9 @@ class Pawn(ChessPiece):
                     player_fr is not None
                     and player_fr.player_controller != self._player_controller
             ):
-                moves.append(move_fr)
+                self._cached_moves.append(move_fr)
 
-        return moves
+        return self._cached_moves
 
     def _get_promotion_zone(self) -> int:
         """

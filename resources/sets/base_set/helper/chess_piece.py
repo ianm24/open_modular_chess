@@ -20,8 +20,11 @@ class ChessPiece(Piece):
             the piece.
         :rtype: list[tuple[int, ...]]
         """
+        if self._board.board_state_hash == self._last_board_state_hash:
+            return self._cached_moves
 
-        moves = []
+        self._last_board_state_hash = self._board.board_state_hash
+        self._cached_moves = []
 
         # Consider all valid directions
         for direction in self.DIRECTIONS:
@@ -31,18 +34,24 @@ class ChessPiece(Piece):
             )
             while self._board.on_board(try_move):
                 try_query = self._board.query_space(try_move)
+
                 # Consider open spaces
                 if try_query is None:
-                    moves.append(try_move)
-                # Consider captures
-                elif try_query.player_controller != self.player_controller:
-                    moves.append(try_move)
+                    self._cached_moves.append(try_move)
+
+                # Consider collisions and captures
+                else:
+                    if try_query.player_controller != self.player_controller:
+                        self._cached_moves.append(try_move)
                     break
 
                 # Consider multiple steps in same direction if able
                 if not self.MULTI_STEP:
                     break
 
-                try_move += direction
+                try_move = (
+                    try_move[0] + direction[0],
+                    try_move[1] + direction[1]
+                )
 
-        return moves
+        return self._cached_moves
