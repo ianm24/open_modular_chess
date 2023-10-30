@@ -26,6 +26,10 @@ class ChessPiece(Piece):
         self._last_board_state_hash = self._board.board_state_hash
         self._cached_moves = []
 
+        if self.current_coords is None:
+            print("This piece is not in play.")
+            return self._cached_moves
+
         # Consider all valid directions
         for direction in self.DIRECTIONS:
             try_move = (

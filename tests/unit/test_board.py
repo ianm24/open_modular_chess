@@ -78,7 +78,8 @@ def test_remove_piece():
     b.add_piece(p)
     b.remove_piece(p)
 
-    assert b.query_space(p.current_coords) is None
+    assert b.query_space((0, 0)) is None
+    assert p.current_coords is None
 
 
 '''AddPlayer Tests'''

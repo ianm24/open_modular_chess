@@ -148,6 +148,7 @@ class Board:
             return False
         index = self.coord_to_index(piece.current_coords)
         self._layout[index] = None
+        piece.remove_from_play()
         self._board_state_hash_dirty = True
         return True
 
@@ -677,6 +678,13 @@ class Piece:
                 and self.piece_char == other.piece_char
             )
         return False
+
+    def remove_from_play(self):
+        """
+        Removes a piece from play by setting coordinates to None.
+        """
+
+        self._current_coords = None
 
 
 ''' TypeVar representing subclasses of "Piece" '''
