@@ -576,7 +576,7 @@ class Piece:
         :return: Hash of the current state of the piece
         :rtype: int
         """
-        return hash(self._current_coords) + hash(self._player_controller)
+        return hash((self._current_coords, self._player_controller))
 
     def list_moves(self) -> list[tuple[int, ...]]:
         """
