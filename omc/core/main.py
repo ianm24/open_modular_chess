@@ -14,19 +14,20 @@ class Game:
         self.main_menu()
 
     def main_menu(self):
-        os.system('cls' if platform.system() == 'Windows' else 'clear')
-        print("Main Menu")
-        print("1. Start Game")
-        print("2. Settings")
-        print("3. Quit Game")
+        while True:
+            os.system('cls' if platform.system() == 'Windows' else 'clear')
+            print("Main Menu")
+            print("1. Start Game")
+            print("2. Settings")
+            print("3. Quit Game")
 
-        choice = input("Enter your choice: ")
-        if choice == '1':
-            self.play_game()
-        elif choice == '2':
-            self.settings()
-        elif choice == '3':
-            self.quit_game()
+            choice = input("Enter your choice: ")
+            if choice == '1':
+                self.play_game()
+            elif choice == '2':
+                self.settings()
+            elif choice == '3':
+                self.quit_game()
 
     @staticmethod
     def _show_board_for_player(board: Board, player: Player) -> None:
@@ -91,23 +92,33 @@ class Game:
 
     def play_game(self):
         os.system('cls' if platform.system() == 'Windows' else 'clear')
-        piece_map, board, win_con, lose_con = load_set.load_set("base_set")
+        piece_map, board, win_con, lose_con = load_set.load_set('base_set')
         game_over = False
+        player_index = 0
+        player_nums = list(board.current_players)
         while not game_over:
-            for player_num, player in board.current_players.items():
-                self._show_board_for_player(board, player)
-                selected_piece = self._ask_for_piece(player)
-                self._show_board_for_piece(board, selected_piece)
-                selected_piece.move(self._ask_for_move(board, selected_piece))
-                # if lose_con.test_condition(board, player):
-                #     print(f'Player {player_num} loses!')
-                #     game_over = True
-                #     break
-                # if win_con.test_condition(board, player):
-                #     print(f'Player {player_num} wins!')
-                #     game_over = True
-                #     break
-        self.main_menu()
+            player_num = player_nums[player_index % len(player_nums)]
+            if player_num not in board.current_players:
+                player_index += 1
+                continue
+            player = board.current_players[player_num]
+            self._show_board_for_player(board, player)
+            selected_piece = self._ask_for_piece(player)
+            self._show_board_for_piece(board, selected_piece)
+            selected_piece.move(self._ask_for_move(board, selected_piece))
+            for check_index in range(len(player_nums)):
+                if check_index not in board.current_players:
+                    continue
+                p_check_num = player_nums[check_index]
+                p_check = board.current_players[p_check_num]
+                if lose_con.test_condition(board, p_check):
+                    print(f'Player {p_check_num} loses!')
+                    board.remove_player(p_check)
+                if win_con.test_condition(board, p_check):
+                    print(f'Player {p_check_num} wins!')
+                    game_over = True
+                    break
+            player_index += 1
 
     def settings(self):
         os.system('cls' if platform.system() == 'Windows' else 'clear')
