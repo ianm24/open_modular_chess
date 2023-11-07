@@ -148,12 +148,13 @@ class Pawn(ChessPiece):
         # Check for promote
         if coords[1] == self._get_promotion_zone():
             # TODO request promotion input from user
+            curr_coords = self._current_coords
             self._board.remove_piece(self)
             self._board.add_piece(Queen(
                 self._board,
-                self._piece_char,
-                self._piece_pxl_hex,
-                self._current_coords,
+                None,
+                None,
+                curr_coords,
                 self._player_controller
             ))
 

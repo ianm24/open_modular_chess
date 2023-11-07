@@ -1,3 +1,5 @@
+import pytest
+
 from omc.core import load_set
 
 '''Pawn Class Tests'''
@@ -100,3 +102,98 @@ def test_pawn_capture():
     assert p1.current_coords == expected_coords
     assert b.query_space(expected_coords) == p1
     assert p2.current_coords is None
+
+
+@pytest.fixture
+def pawn_promotion_board():
+    """
+    Returns a board with a ready-to-promote pawn
+    """
+    base_piece_map = load_set.get_piece_map('base_set')
+    b = load_set.get_board('base_set', base_piece_map)
+
+    p1 = b.query_space((1, 1))
+    p1.move((1, 2))
+    p1.move((1, 3))
+
+    p2 = b.query_space((2, 6))
+    p2.move((2, 5))
+    p2.move((2, 4))
+
+    p1.move((2, 4))
+    p1.move((2, 5))
+    p1.move((2, 6))
+
+    return [b, p1]
+
+
+@pytest.mark.xfail(reason="User-chosen promotion not implemented")
+def test_pawn_promote_queen(pawn_promotion_board):
+    """
+    Ensures proper functionality when pawn promotes
+    """
+    b, p1 = pawn_promotion_board
+    p1.move((1, 7))
+    # User input to select promotion
+
+    expected_coords = None
+    expected_piece_char = "Q"
+    actual_piece = b.query_space((1, 7))
+
+    assert p1.current_coords == expected_coords
+    assert actual_piece != p1
+    assert actual_piece.piece_char == expected_piece_char
+
+
+@pytest.mark.xfail(reason="User-chosen promotion not implemented")
+def test_pawn_promote_knight(pawn_promotion_board):
+    """
+    Ensures proper functionality when pawn promotes
+    """
+    b, p1 = pawn_promotion_board
+    p1.move((1, 7))
+    # TODO User input to select promotion
+
+    expected_coords = None
+    expected_piece_char = "K"
+    actual_piece = b.query_space((1, 7))
+
+    assert p1.current_coords == expected_coords
+    assert actual_piece != p1
+    assert actual_piece.piece_char == expected_piece_char
+
+
+@pytest.mark.xfail(reason="User-chosen promotion not implemented")
+def test_pawn_promote_bishop(pawn_promotion_board):
+    """
+    Ensures proper functionality when pawn promotes
+    """
+    b, p1 = pawn_promotion_board
+    p1.move((1, 7))
+    # TODO User input to select promotion
+
+    expected_coords = None
+    expected_piece_char = "B"
+    actual_piece = b.query_space((1, 7))
+
+    assert p1.current_coords == expected_coords
+    assert actual_piece != p1
+    assert actual_piece.piece_char == expected_piece_char
+
+
+@pytest.mark.xfail(reason="User-chosen promotion not implemented")
+def test_pawn_promote_rook(pawn_promotion_board):
+    """
+    Ensures proper functionality when pawn promotes
+    """
+    b, p1 = pawn_promotion_board
+    p1.move((1, 7))
+    # TODO User input to select promotion
+
+    expected_coords = None
+    expected_piece_char = "R"
+    actual_piece = b.query_space((1, 7))
+
+    assert p1.current_coords == expected_coords
+    assert actual_piece != p1
+    assert actual_piece.piece_char == expected_piece_char
