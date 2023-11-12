@@ -12,6 +12,10 @@ def base_board():
     """
     base_piece_map = load_set.get_piece_map('base_set')
     b = load_set.get_board('base_set', base_piece_map)
+    p1 = b.get_player(1)
+    p2 = b.get_player(2)
+    p1.update_threatened_spaces()
+    p2.update_threatened_spaces()
     return b
 
 
@@ -441,7 +445,6 @@ def test_queen_capture(base_board):
 '''King Class Tests'''
 
 
-@pytest.mark.xfail(reason="Disallowing self-destructive moves not implemented")
 def test_king_moves(base_board):
     """
     Ensures proper moves available for a king

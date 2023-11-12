@@ -744,6 +744,7 @@ class Player:
         """
         self._pieces: list[Piece] = []
         self._player_number = player_number
+        self._threatened_spaces: list[tuple] = []
 
     @property
     def player_number(self) -> int:
@@ -765,6 +766,18 @@ class Player:
         """
         return self._pieces
 
+    @property
+    def threatened_spaces(self) -> list[tuple]:
+        """
+        Gets the spaces threatened by the player.
+
+        :return: List of spaces threatened by the player
+        :rtype: list[tuple]
+        """
+
+        # Set and list conversions used to get unique entries
+        return list(set(self._threatened_spaces))
+
     def add_piece(self, piece: Piece) -> bool:
         """
         Add a piece to the collection owned by the player.
@@ -781,6 +794,7 @@ class Player:
             print("The piece to add is already controlled by this player.")
             return False
         self._pieces.append(piece)
+        self.update_threatened_spaces()
         return True
 
     def remove_piece(self, piece: Piece) -> bool:
@@ -796,6 +810,7 @@ class Player:
             print("The piece to remove is not controlled by this player.")
             return False
         self._pieces.remove(piece)
+        self.update_threatened_spaces()
         return True
 
     def __eq__(self, other: Any):
@@ -813,3 +828,27 @@ class Player:
                 and self.pieces == other.pieces
             )
         return False
+
+    def update_threatened_spaces(self):
+        """
+        Recalculates threatened spaces for a player
+        """
+        updated_threatened_spaces = []
+        for piece in self._pieces:
+            # ----------TODO move this to subclass----------------------------
+            # Pawns have different capture criteria
+            if piece.piece_char == 'P':
+                base_move = piece.list_moves()[0]
+                left_capture = (base_move[0]-1, base_move[1])
+                right_capture = (base_move[0]+1, base_move[1])
+
+                if piece._board.on_board(left_capture):
+                    updated_threatened_spaces.append(left_capture)
+                if piece._board.on_board(right_capture):
+                    updated_threatened_spaces.append(right_capture)
+                continue
+            # ----------------------------------------------------------------
+            for move in piece.list_moves():
+                updated_threatened_spaces.append(move)
+
+        self._threatened_spaces = updated_threatened_spaces
