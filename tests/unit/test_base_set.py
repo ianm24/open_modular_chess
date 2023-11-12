@@ -41,9 +41,20 @@ def test_pawn_moves(base_board):
     expected_blocked_moves = []
     actual_blocked_moves = p.list_moves()
 
+    # Block a first-move pawn
+    p2 = b.query_space((1, 6))
+    p2.move((1, 5))
+    p2.move((1, 4))
+    p2.move((1, 3))
+    p2.move((1, 2))
+
+    expected_first_blocked_moves = []
+    actual_first_blocked_moves = b.query_space((1, 1)).list_moves()
+
     assert actual_first_moves == expected_first_moves
     assert actual_second_moves == expected_second_moves
     assert actual_blocked_moves == expected_blocked_moves
+    assert actual_first_blocked_moves == expected_first_blocked_moves
 
 
 def test_pawn_capture_moves(base_board):

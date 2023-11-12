@@ -7,7 +7,7 @@ This idea is still in its infancy, but its structure is well defined (and becomi
 The base set in `/sets/base_set` is an example of the file structure and specifications that are used to define the base rules of chess.
 
 ## How to Use
-In a command window, go to the `omc` directory and run `python3 core/main.py`
+In a command window, go to the root directory and run `python3 -m omc.core.main`
 
 ## Making a Set
 ### Piece Specification

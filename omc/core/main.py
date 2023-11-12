@@ -50,7 +50,7 @@ class Game:
             if len(piece_select_args) == 1 and piece_select_args[0] == 'l':
                 for piece in player.pieces:
                     if len(piece.list_moves()) == 0:
-                        break
+                        continue
                     print(
                         f'{piece.current_coords[0]} {piece.current_coords[1]}.'
                         f' {piece.piece_char}'

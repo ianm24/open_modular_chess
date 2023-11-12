@@ -89,6 +89,7 @@ class Pawn(ChessPiece):
             )
             if (
                     self._current_coords == self._starting_coords
+                    and self._board.query_space(move_f) is None
                     and self._board.query_space(move_ff) is None
             ):
                 self._cached_moves.append(move_ff)
