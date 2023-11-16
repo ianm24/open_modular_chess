@@ -57,29 +57,35 @@ class ChessPlayer(Player):
                     updated_threatened_spaces.append(left_capture)
 
                     # If opposing king is threatened, it causes check
-                    if (board.query_space(left_capture) is not None) and (
-                        board.query_space(left_capture).piece_char == "K"
-                    ) and (board.query_space(left_capture).player_controller
-                           != self.player_number):
+                    th_piece = board.query_space(left_capture)
+                    if (
+                        th_piece is not None
+                        and th_piece.piece_char == "K"
+                        and th_piece.player_controller != self.player_number
+                    ):
                         causing_check = True
                 if piece._board.on_board(right_capture):
                     updated_threatened_spaces.append(right_capture)
 
                     # If opposing king is threatened, it causes check
-                    if (board.query_space(right_capture) is not None) and (
-                        board.query_space(right_capture).piece_char == "K"
-                    ) and (board.query_space(right_capture).player_controller
-                           != self.player_number):
+                    th_piece = board.query_space(right_capture)
+                    if (
+                        th_piece is not None
+                        and th_piece.piece_char == "K"
+                        and th_piece.player_controller != self.player_number
+                    ):
                         causing_check = True
             else:
                 for move in piece.list_moves():
                     updated_threatened_spaces.append(move)
 
                     # If opposing king is threatened, it causes check
-                    if (board.query_space(move) is not None) and (
-                        board.query_space(move).piece_char == "K"
-                    ) and (board.query_space(move).player_controller
-                           != self.player_number):
+                    th_piece = board.query_space(move)
+                    if (
+                        th_piece is not None
+                        and th_piece.piece_char == "K"
+                        and th_piece.player_controller != self.player_number
+                    ):
                         causing_check = True
 
         if causing_check:
