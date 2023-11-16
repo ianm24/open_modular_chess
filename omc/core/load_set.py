@@ -21,11 +21,12 @@ from omc.core.exception.exception import InvalidBoardFormatException
 from omc.core.exception.exception import InvalidBoardLayoutException
 from omc.core.exception.exception import PiecesEmptyException
 from omc.core.exception.exception import PiecesNotFoundException
+from omc.core.exception.exception import PlayerClassInvalidException
+from omc.core.exception.exception import PlayerNotFoundException
 from omc.core.exception.exception import SetNotFoundException
 from omc.core.model.board import Board
 from omc.core.model.board import Piece
 from omc.core.model.board import PieceClass
-from omc.core.model.board import Player
 from omc.core.model.condition import Condition
 
 ''' File path to 'sets' directory '''
@@ -42,6 +43,9 @@ SET_CONDITIONS_DIR = '/conditions'
 
 ''' Standard name for the board file in a set '''
 BOARD_FILE_NAME = '/board.csv'
+
+'''Standard ending for the player file in a set'''
+PLAYER_FILE_ENDING = '_player.py'
 
 ''' Standard name for the win condition file in a set '''
 WIN_FILE_NAME = 'win.py'
@@ -219,7 +223,32 @@ def get_board(set_name: str, piece_map: dict[str, PieceClass]) -> Board:
     board = Board.empty(0, (columns, rows))
 
     # inst players
-    players = {pn: Player(pn) for pn in player_numbers}
+    # Load the set's player class dynamically
+    set_path = SETS_DIR + set_name
+    player_class = None
+    try:
+        for file_name in listdir(set_path):
+            if (file_name.endswith('_player.py')):
+                player_name = file_name.partition('.py')[0]
+                player_class_name = player_name.title().replace('_', '')
+                loader = importlib.machinery.SourceFileLoader(
+                    player_class_name, set_path + '/' + file_name
+                )
+                player_class = getattr(loader.load_module(), player_class_name)
+    except AttributeError:
+        raise PlayerClassInvalidException(
+            f"\nError: The set {set_name} has a player class"
+            f"with an invalid name convention. Player file '{file_name}'"
+            f" should have class name '{player_class_name}'."
+        )
+
+    if player_class is None:
+        raise PlayerNotFoundException(
+            f"\nError: The set {set_name} does not contain a "
+            f"file ending in '{PLAYER_FILE_ENDING}'."
+        )
+
+    players = {pn: player_class(pn) for pn in player_numbers}
 
     # assign players -> board
     for player in players.values():

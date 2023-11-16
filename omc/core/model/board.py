@@ -737,7 +737,7 @@ class Player:
 
     def __init__(self, player_number: int):
         """
-        Initialize an instance of Piece.
+        Initialize an instance of Player.
 
         :param player_number: The board the piece belongs to.
         :ptype player_number: int
@@ -835,20 +835,31 @@ class Player:
         """
         updated_threatened_spaces = []
         for piece in self._pieces:
-            # ----------TODO move this to subclass----------------------------
-            # Pawns have different capture criteria
-            if piece.piece_char == 'P':
-                base_move = piece.list_moves()[0]
-                left_capture = (base_move[0]-1, base_move[1])
-                right_capture = (base_move[0]+1, base_move[1])
-
-                if piece._board.on_board(left_capture):
-                    updated_threatened_spaces.append(left_capture)
-                if piece._board.on_board(right_capture):
-                    updated_threatened_spaces.append(right_capture)
-                continue
-            # ----------------------------------------------------------------
             for move in piece.list_moves():
                 updated_threatened_spaces.append(move)
 
         self._threatened_spaces = updated_threatened_spaces
+
+    def check_lose_condition(self) -> bool:
+        """
+        Checks if this player has lost
+
+        :return: True if player has lost, False otherwise
+        :rtype: bool
+        """
+
+        raise NotImplementedError
+
+    def check_win_condition(self) -> bool:
+        """
+        Checks if this player has won
+
+        :return: True if player has won, False otherwise
+        :rtype: bool
+        """
+
+        raise NotImplementedError
+
+
+''' TypeVar representing subclasses of "Player" '''
+PlayerClass = Callable[..., Player]

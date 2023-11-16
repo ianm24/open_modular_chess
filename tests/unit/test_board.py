@@ -725,3 +725,56 @@ def test_player_add_piece_already_added():
     player.add_piece(piece)
 
     assert player.add_piece(piece) is False
+
+
+def test_player_threatened_spaces():
+    """
+    Ensures proper function when player checks threatened spaces
+    """
+
+    b = Board.empty(1, (8, 8))
+    p = Player(1)
+    b.add_player(p)
+    piece = SimplePiece(b)
+    b.add_piece(piece)
+
+    expected_area = []
+    actual_area = p.threatened_spaces
+
+    assert actual_area == expected_area
+
+
+def test_player_update_threatened_spaces():
+    """
+    Ensures proper function when player updates threatened spaces
+    """
+
+    b = Board.empty(1, (8, 8))
+    p = Player(1)
+    b.add_player(p)
+    piece = SimplePiece(b)
+    b.add_piece(piece)
+    p.add_piece(piece)
+
+    expected_area = [(0, 1)]
+    actual_area = p.threatened_spaces
+
+    assert actual_area == expected_area
+
+
+def test_player_lose_condition_not_implemented():
+    """
+    Ensures proper function when player lose condition isnt implemented
+    """
+
+    with pytest.raises(NotImplementedError):
+        Player(1).check_lose_condition()
+
+
+def test_player_win_condition_not_implemented():
+    """
+    Ensures proper function when player win condition isnt implemented
+    """
+
+    with pytest.raises(NotImplementedError):
+        Player(1).check_win_condition()

@@ -13,6 +13,8 @@ from omc.core.exception.exception import InvalidBoardFormatException
 from omc.core.exception.exception import InvalidBoardLayoutException
 from omc.core.exception.exception import PiecesEmptyException
 from omc.core.exception.exception import PiecesNotFoundException
+from omc.core.exception.exception import PlayerClassInvalidException
+from omc.core.exception.exception import PlayerNotFoundException
 from omc.core.exception.exception import SetNotFoundException
 from omc.core.model.board import Board
 
@@ -151,6 +153,38 @@ def test_invalid_board():
         load_set.get_board(
             "test_sets/test_set_extra_values_board", base_set_piece_map
         )
+
+
+def test_missing_player_file():
+    """
+    Ensures proper function when player file is missing
+    """
+
+    with pytest.raises(PlayerNotFoundException):
+        base_set_piece_map = dict()
+        load_set.get_board(
+            "test_sets/test_set_missing_player_file", base_set_piece_map)
+
+
+def test_invalid_player_file_name():
+    """
+    Ensures proper function when player file name is incorrect
+    """
+    with pytest.raises(PlayerNotFoundException):
+        base_set_piece_map = dict()
+        load_set.get_board(
+            "test_sets/test_set_invalid_player_file_name", base_set_piece_map)
+
+
+def test_invalid_player_class_name():
+    """
+    Ensures proper function when player file name is incorrect
+    """
+
+    with pytest.raises(PlayerClassInvalidException):
+        base_set_piece_map = dict()
+        load_set.get_board(
+            "test_sets/test_set_invalid_player_class_name", base_set_piece_map)
 
 
 @pytest.mark.xfail(reason="Needs to be adapted to new Board structure")

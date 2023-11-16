@@ -476,40 +476,6 @@ def test_king_moves(base_board):
     assert expected_moves == actual_moves
 
 
-@pytest.mark.xfail(reason="Check not implemented yet")
-def test_king_check_moves(base_board):
-    """
-    Ensures proper function when a king is in check
-    """
-
-    b = base_board
-
-    k = b.query_space((3, 0))
-
-    # Move pawn out of king's way
-    p = b.query_space((3, 1))
-    p.move((3, 3))
-    p.move((3, 4))
-    p.move((3, 5))
-    p.move((4, 6))
-
-    k.move((3, 1))
-    k.move((3, 2))
-    k.move((3, 3))
-    k.move((2, 4))
-
-    # Move Knight and Queen for check
-    b.query_space((1, 7)).move((0, 5))
-    q = b.query_space((4, 7))
-    q.move((4, 6))
-    q.move((4, 5))
-
-    expected_first_moves = [(1, 4), (1, 3), (3, 3)]
-    actual_first_moves = k.list_moves()
-
-    assert actual_first_moves == expected_first_moves
-
-
 def test_king_capture(base_board):
     """
     Ensures proper function when a king captures a piece
@@ -619,3 +585,135 @@ def test_king_castle_queen_side(castling_board):
     assert r.current_coord == expected_rook_coord
     assert b.query_space(expected_king_coord) == k
     assert b.query_space(expected_rook_coord) == r
+
+
+'''ChessPlayer Tests'''
+
+
+def test_chess_player_set_check(base_board):
+    """
+    Ensures proper function when chess player's check status is set
+    """
+
+    b = base_board
+    p = b.get_player(1)
+
+    p.set_check(True)
+
+    assert p.in_check is True
+
+
+def test_chess_player_update_threatened_spaces(base_board):
+    """
+    Ensures proper function when chess player updates threatened spaces
+    """
+
+    b = base_board
+    p = b.get_player(1)
+
+    expected_starting_area = [
+        (0, 2), (1, 2), (2, 2), (3, 2), (4, 2), (5, 2), (6, 2), (7, 2)]
+    actual_starting_area = p.threatened_spaces
+
+    # Move pawn
+    b.query_space((1, 1)).move((1, 2))
+    p.update_threatened_spaces()
+
+    expected_area = [(0, 2), (0, 3), (1, 1), (1, 2), (2, 2),
+                     (2, 3), (3, 2), (4, 2), (5, 2), (6, 2), (7, 2)]
+    actual_area = p.threatened_spaces
+
+    assert sorted(actual_starting_area) == expected_starting_area
+    assert sorted(actual_area) == expected_area
+
+
+@pytest.fixture
+def check_board(base_board):
+    """
+    Returns a board where player 1 is in check
+    """
+    b = base_board
+
+    k = b.query_space((3, 0))
+
+    # Move pawn out of king's way
+    p1 = b.query_space((3, 1))
+    p1.move((3, 3))
+    p1.move((3, 4))
+    p1.move((3, 5))
+    p1.move((4, 6))
+
+    # Move enemy pawn for king capture
+    p2 = b.query_space((3, 6))
+    p2.move((3, 4))
+
+    k.move((3, 1))
+    k.move((2, 2))
+    k.move((2, 3))
+
+    p2.move((3, 2))
+
+    return b
+
+
+def test_chess_player_update_threatened_spaces_sets_check(check_board):
+    """
+    Ensures proper function when chess player updates threatened spaces after
+    putting other player in check
+    """
+    b = check_board
+    b.get_player(2).update_threatened_spaces()
+
+    assert b.get_player(1).in_check is True
+
+
+@pytest.mark.xfail(reason="Move limiting for check not implemented yet")
+def test_moves_in_check(check_board):
+    """
+    Ensures proper function when a player is in check
+    """
+
+    b = check_board
+
+    k = b.query_space((3, 0))
+
+    # Move pawn out of king's way
+    p = b.query_space((3, 1))
+    p.move((3, 3))
+    p.move((3, 4))
+    p.move((3, 5))
+    p.move((4, 6))
+
+    k.move((3, 1))
+    k.move((3, 2))
+    k.move((3, 3))
+    k.move((2, 4))
+
+    # Move Knight and Queen for check
+    b.query_space((1, 7)).move((0, 5))
+    q = b.query_space((4, 7))
+    q.move((4, 6))
+    q.move((4, 5))
+
+    expected_first_moves = [(1, 4), (1, 3), (3, 3)]
+    actual_first_moves = k.list_moves()
+
+    assert actual_first_moves == expected_first_moves
+
+
+@pytest.mark.xfail(reason="Test not implemented")
+def test_chess_player_lose_condition():
+    """
+    Ensures proper function when chess player checks lose condition
+    """
+
+    assert False is True
+
+
+@pytest.mark.xfail(reason="Test not implemented")
+def test_chess_player_win_condition():
+    """
+    Ensures proper function when chess player checks win condition
+    """
+
+    assert False is True
