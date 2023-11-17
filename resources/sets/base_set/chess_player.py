@@ -131,7 +131,7 @@ class ChessPlayer(Player):
                 moveable_pieces.append(piece)
             if moveable_pieces == []:
                 return True
-        
+
         return False
 
     def check_win_condition(self) -> bool:
