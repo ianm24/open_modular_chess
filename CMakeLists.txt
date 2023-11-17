@@ -11,8 +11,16 @@ endif()
 
 project ("open_modular_chess")
 
+set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/open_modular_chess.cpp)
+set(INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/inc/open_modular_chess.h)
+
 # Add source to this project's executable.
-add_executable (open_modular_chess "open_modular_chess.cpp" "open_modular_chess.h")
+add_executable (open_modular_chess ${SOURCES} ${INCLUDE})
+
+target_include_directories(open_modular_chess PUBLIC
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET open_modular_chess PROPERTY CXX_STANDARD 20)
