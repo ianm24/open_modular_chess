@@ -9,21 +9,25 @@ from os.path import exists
 from os.path import isdir
 from os.path import isfile
 from os.path import join
-from typing import Callable
+from typing import cast
 
 import numpy as np
 
 from omc.core.exception.exception import BoardNotFoundException
+from omc.core.exception.exception import ConditionNotFoundException
 from omc.core.exception.exception import EmptyBoardException
 from omc.core.exception.exception import InvalidBoardDimensionException
 from omc.core.exception.exception import InvalidBoardFormatException
 from omc.core.exception.exception import InvalidBoardLayoutException
 from omc.core.exception.exception import PiecesEmptyException
 from omc.core.exception.exception import PiecesNotFoundException
+from omc.core.exception.exception import PlayerClassInvalidException
+from omc.core.exception.exception import PlayerNotFoundException
 from omc.core.exception.exception import SetNotFoundException
 from omc.core.model.board import Board
 from omc.core.model.board import Piece
-from omc.core.model.board import Player
+from omc.core.model.board import PieceClass
+from omc.core.model.condition import Condition
 
 ''' File path to 'sets' directory '''
 SETS_DIR = dirname(abspath(__file__)) + '/../../resources/sets/'
@@ -34,17 +38,28 @@ SET_PIECES_DIR = '/pieces'
 ''' File path to 'scripts' directory inside of a set's directory '''
 SET_SCRIPTS_DIR = '/scripts'
 
+''' File path to 'conditions' directory inside of a set's directory '''
+SET_CONDITIONS_DIR = '/conditions'
+
 ''' Standard name for the board file in a set '''
 BOARD_FILE_NAME = '/board.csv'
+
+'''Standard ending for the player file in a set'''
+PLAYER_FILE_ENDING = '_player.py'
+
+''' Standard name for the win condition file in a set '''
+WIN_FILE_NAME = 'win.py'
+
+''' Standard name for the lose condition file in a set '''
+LOSE_FILE_NAME = 'lose.py'
 
 ''' Number of values that should be in a board file '''
 NUM_BOARD_VALS = 3
 
-''' TypeVar representing subclasses of "Piece" '''
-PieceClass = Callable[..., Piece]
 
-
-def load_set(set_name: str) -> list:
+def load_set(
+        set_name: str
+) -> tuple[dict[str, PieceClass], Board, Condition, Condition]:
     """
     Loads a set
 
@@ -64,11 +79,10 @@ def load_set(set_name: str) -> list:
 
     piece_map: dict[str, PieceClass] = get_piece_map(set_name)
     board: Board = get_board(set_name, piece_map)
-    # win = get_win(set_name)
-    # lose = get_lose(set_name)
+    win: Condition = get_win_condition(set_name)
+    lose: Condition = get_lose_condition(set_name)
 
-    return [board]
-    # return [[pieces,board,win,lose], None]
+    return piece_map, board, win, lose
 
 
 def get_piece_map(set_name: str) -> dict[str, PieceClass]:
@@ -119,11 +133,11 @@ def get_board(set_name: str, piece_map: dict[str, PieceClass]) -> Board:
     """
     Gets the board information for a set
 
-    :param piece_map:
+    :param piece_map: Map of piece names to classes
     :type piece_map: dict[str, PieceClass]
     :param set_name: The selected set's folder name inside the 'sets' directory
     :type set_name: str
-    :return: board - The loaded board
+    :return: The loaded board
     :rtype: Board
     """
 
@@ -209,7 +223,32 @@ def get_board(set_name: str, piece_map: dict[str, PieceClass]) -> Board:
     board = Board.empty(0, (columns, rows))
 
     # inst players
-    players = {pn: Player(pn) for pn in player_numbers}
+    # Load the set's player class dynamically
+    set_path = SETS_DIR + set_name
+    player_class = None
+    try:
+        for file_name in listdir(set_path):
+            if (file_name.endswith('_player.py')):
+                player_name = file_name.partition('.py')[0]
+                player_class_name = player_name.title().replace('_', '')
+                loader = importlib.machinery.SourceFileLoader(
+                    player_class_name, set_path + '/' + file_name
+                )
+                player_class = getattr(loader.load_module(), player_class_name)
+    except AttributeError:
+        raise PlayerClassInvalidException(
+            f"\nError: The set {set_name} has a player class"
+            f"with an invalid name convention. Player file '{file_name}'"
+            f" should have class name '{player_class_name}'."
+        )
+
+    if player_class is None:
+        raise PlayerNotFoundException(
+            f"\nError: The set {set_name} does not contain a "
+            f"file ending in '{PLAYER_FILE_ENDING}'."
+        )
+
+    players = {pn: player_class(pn) for pn in player_numbers}
 
     # assign players -> board
     for player in players.values():
@@ -231,8 +270,9 @@ def get_board(set_name: str, piece_map: dict[str, PieceClass]) -> Board:
         return None
 
     layout = np.empty(np.array([columns, rows]), dtype=Piece)
-    for coord, piece_name in np.ndenumerate(piece_name_layout):
-        layout[coord] = piece_map_func(piece_name, coord)
+    for index, piece_name in np.ndenumerate(piece_name_layout):
+        coord = Board.index_to_coord(index)
+        layout[index] = piece_map_func(piece_name, coord)
 
     # assign pieces -> players and pieces -> board
     for piece in layout.flatten():
@@ -244,3 +284,55 @@ def get_board(set_name: str, piece_map: dict[str, PieceClass]) -> Board:
 
     print(f'\nSuccessfully loaded board from set {set_name}')
     return board
+
+
+def load_condition(set_name: str, file_name: str) -> Condition:
+    """
+    Loads a condition for a set
+
+    :param set_name: The selected set's folder name inside the 'sets' directory
+    :type set_name: str
+    :param file_name: The condition's file name inside the set folder
+    :type file_name: str
+    :return: The loaded condition
+    :rtype: Condition
+    """
+    # Gets file_path for pieces
+    dir_path = SETS_DIR + set_name + SET_CONDITIONS_DIR
+
+    if not isdir(dir_path):
+        raise ConditionNotFoundException(
+            f"\nError: The set {set_name} does not contain a 'conditions'"
+            f" directory."
+        )
+    condition_name = file_name.partition('.py')[0]
+    condition_class_name = condition_name.title().replace('_', '')
+    loader = importlib.machinery.SourceFileLoader(
+        condition_class_name, dir_path + '/' + file_name
+    )
+    condition_class = getattr(loader.load_module(), condition_class_name)
+    return cast(Condition, condition_class())
+
+
+def get_win_condition(set_name: str) -> Condition:
+    """
+    Loads a win condition for a set
+
+    :param set_name: The selected set's folder name inside the 'sets' directory
+    :type set_name: str
+    :return: The loaded win condition
+    :rtype: Condition
+    """
+    return load_condition(set_name, WIN_FILE_NAME)
+
+
+def get_lose_condition(set_name: str) -> Condition:
+    """
+    Loads a lose condition for a set
+
+    :param set_name: The selected set's folder name inside the 'sets' directory
+    :type set_name: str
+    :return: The loaded lose condition
+    :rtype: Condition
+    """
+    return load_condition(set_name, LOSE_FILE_NAME)

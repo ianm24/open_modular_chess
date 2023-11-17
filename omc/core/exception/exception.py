@@ -10,6 +10,10 @@ class PiecesNotFoundException(AbstractOpenModularChessException):
     """Specified set not found in the sets directory"""
 
 
+class ConditionNotFoundException(AbstractOpenModularChessException):
+    """Specified condition not found in the sets directory"""
+
+
 class PiecesEmptyException(AbstractOpenModularChessException):
     """Specified set not found in the sets directory"""
 
@@ -68,3 +72,11 @@ class PieceAlreadyAtLocationException(AbstractOpenModularChessException):
 
 class PlayerNotControllingPieceException(AbstractOpenModularChessException):
     """Player attempted to add a piece it does not control"""
+
+
+class PlayerNotFoundException(AbstractOpenModularChessException):
+    """Player file of standard naming not found in set directory"""
+
+
+class PlayerClassInvalidException(AbstractOpenModularChessException):
+    """Set-defined Player class has wrong naming convention"""
