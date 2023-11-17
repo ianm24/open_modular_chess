@@ -850,6 +850,16 @@ class Player:
 
         raise NotImplementedError
 
+    def check_draw_condition(self) -> bool:
+        """
+        Checks if this player is in a draw
+
+        :return: True if player is in a draw, False otherwise
+        :rtype: bool
+        """
+
+        raise NotImplementedError
+
     def check_win_condition(self) -> bool:
         """
         Checks if this player has won

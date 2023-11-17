@@ -114,6 +114,26 @@ class ChessPlayer(Player):
 
         return False
 
+    def check_draw_condition(self) -> bool:
+        """
+        Checks if this player is in a draw
+
+        :return: True if player is in a draw, False otherwise
+        :rtype: bool
+        """
+
+        if not self.in_check:
+            # Check for moveable pieces
+            moveable_pieces = []
+            for piece in self.pieces:
+                if len(piece.list_moves()) == 0:
+                    continue
+                moveable_pieces.append(piece)
+            if moveable_pieces == []:
+                return True
+        
+        return False
+
     def check_win_condition(self) -> bool:
         """
         Checks if this player has won

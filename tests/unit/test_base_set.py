@@ -711,6 +711,15 @@ def test_chess_player_lose_condition():
 
 
 @pytest.mark.xfail(reason="Test not implemented")
+def test_chess_player_draw_condition_not_implemented():
+    """
+    Ensures proper function when player draw condition isnt implemented
+    """
+
+    assert False is True
+
+
+@pytest.mark.xfail(reason="Test not implemented")
 def test_chess_player_win_condition():
     """
     Ensures proper function when chess player checks win condition

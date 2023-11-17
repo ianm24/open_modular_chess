@@ -771,6 +771,15 @@ def test_player_lose_condition_not_implemented():
         Player(1).check_lose_condition()
 
 
+def test_player_draw_condition_not_implemented():
+    """
+    Ensures proper function when player draw condition isnt implemented
+    """
+
+    with pytest.raises(NotImplementedError):
+        Player(1).check_draw_condition()
+
+
 def test_player_win_condition_not_implemented():
     """
     Ensures proper function when player win condition isnt implemented
